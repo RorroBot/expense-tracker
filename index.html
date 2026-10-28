@@ -55,6 +55,7 @@ button { font: inherit; color: inherit; }
 /* header */
 .top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 6px; }
 .top h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.hdr-btns { display: flex; gap: 2px; }
 .icon-btn {
   width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent;
   display: grid; place-items: center; cursor: pointer;
@@ -62,38 +63,30 @@ button { font: inherit; color: inherit; }
 .icon-btn:active { background: var(--rule); }
 .icon-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* balances */
-.total { padding: 8px 0 14px; }
-.total .label { color: var(--muted); font-size: 14px; }
-.total .value { font-size: 40px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
-.total .value.neg { color: var(--expense); }
-.accts { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 10px; margin: 0 -16px; scroll-snap-type: x proximity; }
-.accts::-webkit-scrollbar { display: none; }
-.acct {
-  flex: 0 0 auto; min-width: 128px; text-align: left; scroll-snap-align: start;
-  background: var(--card); border: 1.5px solid var(--rule); border-radius: 12px; padding: 10px 14px; cursor: pointer;
+/* account filter */
+.pills { display: flex; gap: 8px; overflow-x: auto; padding: 8px 16px 10px; margin: 0 -16px; }
+.pills::-webkit-scrollbar { display: none; }
+.pill {
+  flex: 0 0 auto; border: 1.5px solid var(--rule); background: var(--card); border-radius: 999px;
+  padding: 8px 16px; cursor: pointer; white-space: nowrap; font-weight: 550;
 }
-.acct.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.acct-name { display: block; color: var(--muted); font-size: 13px; white-space: nowrap; }
-.acct-bal { display: block; font-size: 19px; font-weight: 650; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.acct-bal.neg { color: var(--expense); }
-.filter-note { color: var(--muted); font-size: 13px; padding: 2px 0 6px; }
+.pill.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
-/* list */
-.day { margin-top: 14px; padding-bottom: 4px; border-bottom: 1.5px solid var(--ink); font-size: 14px; font-weight: 650; display: flex; justify-content: space-between; }
-.day span:last-child { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+/* ledger */
+.day { margin-top: 14px; padding-bottom: 4px; border-bottom: 1.5px solid var(--ink); font-size: 14px; font-weight: 650; }
 .row {
   display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px;
   text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule);
-  padding: 12px 2px; cursor: pointer; min-height: 56px;
+  padding: 12px 2px; cursor: pointer; min-height: 60px;
 }
 .row:active { background: var(--rule); }
 .row-main { min-width: 0; }
-.row-cat { font-weight: 600; }
+.row-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-sub { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-amtbox { text-align: right; flex: 0 0 auto; }
 .row-amt { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .row-amt.income { color: var(--income); }
-.row-amt.expense { color: var(--ink); }
+.row-cur { font-size: 11px; color: var(--muted); line-height: 1.2; }
 .empty { text-align: center; color: var(--muted); padding: 48px 12px; }
 .more { display: block; margin: 18px auto 0; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--rule); background: var(--card); cursor: pointer; }
 
@@ -114,20 +107,27 @@ dialog {
 dialog::backdrop { background: rgba(10, 14, 24, .5); }
 .dlg { padding: 18px 18px 16px; }
 .dlg h2 { margin: 0 0 12px; font-size: 18px; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--paper); border-radius: 12px; padding: 4px; margin-bottom: 14px; }
-.seg button { border: 0; background: transparent; padding: 10px; border-radius: 9px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.seg { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); background: var(--paper); border-radius: 12px; padding: 4px; margin-bottom: 14px; }
+.seg button { border: 0; background: transparent; padding: 10px 4px; border-radius: 9px; font-weight: 600; color: var(--muted); cursor: pointer; }
 .seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.18); }
 .seg button.on.income { color: var(--income); }
 .seg button.on.expense { color: var(--expense); }
+.seg button.on.transfer { color: var(--accent); }
 .field { display: block; margin-bottom: 12px; }
-.field > span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-input[type=text], input[type=datetime-local], select, textarea {
+.field > span, .grp-title { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+input[type=text], input[type=datetime-local], select {
   width: 100%; font: inherit; font-size: 16px; color: var(--ink); background: var(--paper);
   border: 1.5px solid transparent; border-radius: 10px; padding: 11px 12px; min-height: 46px; appearance: none; -webkit-appearance: none;
 }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+select { background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 30px; }
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+.money { position: relative; }
+.money input { padding-right: 50px; text-align: right; }
+.money .tag { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); pointer-events: none; }
 .amount { font-size: 30px !important; font-weight: 700; letter-spacing: -.01em; }
+.money .amount ~ .tag { font-size: 12px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grp { margin-bottom: 12px; }
 .btns { display: flex; gap: 10px; margin-top: 16px; }
 .btn {
   flex: 1; min-height: 48px; border-radius: 12px; border: 1.5px solid var(--rule); background: var(--card);
@@ -141,13 +141,17 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .sec { margin-top: 22px; }
 .sec h2 { font-size: 17px; margin: 0 0 4px; }
 .sec p.hint { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
-.acct-row { display: grid; grid-template-columns: 1fr 96px auto auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
-.acct-row input[type=text] { min-height: 42px; padding: 8px 10px; }
-.def { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.acct-card { padding: 10px 0 12px; border-bottom: 1px solid var(--rule); }
+.acct-card > input { margin-bottom: 8px; }
+.acct-meta { display: flex; align-items: flex-end; gap: 8px; }
+.acct-meta select { width: 88px; min-height: 42px; flex: 0 0 auto; }
+.open { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); }
+.open input { min-height: 42px; margin-top: 2px; }
+.def { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; height: 42px; }
 .def input { width: 20px; height: 20px; accent-color: var(--accent); }
-.mini { width: 40px; height: 40px; border-radius: 10px; border: 0; background: transparent; color: var(--expense); font-size: 22px; cursor: pointer; }
+.mini { width: 40px; height: 42px; border-radius: 10px; border: 0; background: transparent; color: var(--expense); font-size: 22px; cursor: pointer; flex: 0 0 auto; }
 .mini:active { background: var(--rule); }
-.add-row { display: grid; grid-template-columns: 1fr 96px auto; gap: 8px; margin-top: 10px; }
+.add-row { display: grid; grid-template-columns: 1fr 88px auto; gap: 8px; margin-top: 12px; }
 .add-row .btn { flex: none; min-height: 46px; padding: 0 16px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
 .chip { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 1.5px solid var(--rule); border-radius: 999px; padding: 4px 4px 4px 12px; }
@@ -157,7 +161,26 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .add-cat .btn { flex: none; padding: 0 16px; min-height: 46px; }
 .data-btns { display: grid; gap: 8px; }
 .data-btns .btn { flex: none; text-align: left; padding: 0 14px; }
-.cur { width: 90px; }
+
+/* stats */
+.bal-line { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.bal-line .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bal-line .amt { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+.bal-line .amt.neg { color: var(--expense); }
+.bal-line .code { display: block; font-size: 11px; font-weight: 400; color: var(--muted); line-height: 1.2; }
+.bal-total .amt { font-size: 22px; }
+.pcols, .prow { display: grid; grid-template-columns: 44px 1fr 1fr; gap: 6px; align-items: baseline; }
+.pcols { color: var(--muted); font-size: 13px; text-align: right; padding: 0 2px; margin-top: 10px; }
+.pblock { display: block; width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 12px 2px; }
+button.pblock { cursor: pointer; }
+button.pblock:active { background: var(--rule); }
+.ptitle { font-weight: 650; margin-bottom: 4px; display: flex; justify-content: space-between; }
+.tappable .ptitle::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-top: 2px solid var(--muted); transform: rotate(45deg); margin: 6px 4px 0 0; }
+.prow { font-variant-numeric: tabular-nums; }
+.pcode { font-size: 11px; color: var(--muted); }
+.pinc { color: var(--income); text-align: right; }
+.pexp { text-align: right; }
+.footnote { color: var(--muted); font-size: 13px; margin-top: 14px; }
 [hidden] { display: none !important; }
 @media (prefers-reduced-motion: no-preference) {
   .fab, .btn, .row { transition: transform .12s, background-color .12s; }
@@ -170,19 +193,30 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 <main id="home" class="wrap">
   <header class="top">
     <h1>Expenses</h1>
-    <button class="icon-btn" id="btnSettings" aria-label="Configuration">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-    </button>
+    <div class="hdr-btns">
+      <button class="icon-btn" id="btnStats" aria-label="Stats">
+        <svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>
+      </button>
+      <button class="icon-btn" id="btnSettings" aria-label="Configuration">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
   </header>
 
-  <section class="total">
-    <div class="label">Total balance</div>
-    <div class="value num" id="total">0.00</div>
-  </section>
-  <section class="accts" id="balances" aria-label="Account balances"></section>
-  <div class="filter-note" id="filterNote" hidden></div>
-
+  <section class="pills" id="pills" aria-label="Filter by account"></section>
   <section id="list" aria-label="Recent entries"></section>
+</main>
+
+<!-- STATS -->
+<main id="stats" class="wrap" hidden>
+  <header class="top">
+    <button class="icon-btn" id="btnStatsBack" aria-label="Back">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h1 id="statsTitle">Stats</h1>
+    <span style="width:44px"></span>
+  </header>
+  <div id="statsBody"></div>
 </main>
 
 <!-- SETTINGS -->
@@ -197,11 +231,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 
   <section class="sec">
     <h2>Accounts</h2>
-    <p class="hint">Edit a name or opening balance directly. The default account is preselected when you add an entry.</p>
+    <p class="hint">Each account has its own currency. The default account is preselected when you add an entry.</p>
     <div id="acctList"></div>
     <form class="add-row" id="addAcctForm">
       <input type="text" id="newAcctName" placeholder="New account name" autocomplete="off">
-      <input type="text" id="newAcctOpen" placeholder="Opening" inputmode="decimal" autocomplete="off">
+      <select id="newAcctCur" aria-label="Currency"></select>
       <button class="btn primary" type="submit">Add</button>
     </form>
   </section>
@@ -217,15 +251,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
   </section>
 
   <section class="sec">
-    <h2>Currency symbol</h2>
-    <input type="text" id="currency" class="cur" maxlength="4" autocomplete="off">
-  </section>
-
-  <section class="sec">
     <h2>Your data</h2>
     <p class="hint" id="persistNote">Everything is stored on this device only. Back up regularly.</p>
     <div class="data-btns">
-      <button class="btn" id="btnCsv" type="button">Export entries as CSV (for Excel)</button>
+      <button class="btn" id="btnXlsx" type="button">Export entries to Excel (.xlsx)</button>
+      <button class="btn" id="btnCsv" type="button">Export entries as CSV</button>
       <button class="btn" id="btnBackup" type="button">Save a full backup (JSON)</button>
       <button class="btn" id="btnRestore" type="button">Restore from a backup</button>
       <input type="file" id="fileRestore" accept="application/json,.json" hidden>
@@ -242,23 +272,58 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 <dialog id="dlg">
   <form class="dlg" id="entryForm" autocomplete="off">
     <h2 id="dlgTitle">New entry</h2>
-    <div class="seg" role="group" aria-label="Entry type">
+    <div class="seg" id="seg" role="group" aria-label="Entry type">
       <button type="button" id="segExpense" class="expense on">Expense</button>
       <button type="button" id="segIncome" class="income">Income</button>
+      <button type="button" id="segTransfer" class="transfer">Transfer</button>
     </div>
-    <label class="field"><span>Amount</span>
-      <input type="text" id="fAmount" class="amount num" inputmode="decimal" placeholder="0.00">
-    </label>
+
+    <div id="normalAmount">
+      <label class="field"><span>Amount</span>
+        <div class="money">
+          <input type="text" id="fAmount" class="amount num" inputmode="decimal" placeholder="0.00">
+          <span class="tag" id="fAmountTag">USD</span>
+        </div>
+      </label>
+    </div>
+
     <label class="field"><span>Date and time</span>
       <input type="datetime-local" id="fDate">
     </label>
-    <div class="two">
-      <label class="field"><span>Category</span><select id="fCategory"></select></label>
-      <label class="field"><span>Account</span><select id="fAccount"></select></label>
+
+    <div id="normalFields">
+      <div class="two">
+        <label class="field"><span>Category</span><select id="fCategory"></select></label>
+        <label class="field"><span>Account</span><select id="fAccount"></select></label>
+      </div>
+      <label class="field"><span>Description</span>
+        <input type="text" id="fDesc" placeholder="Optional">
+      </label>
     </div>
-    <label class="field"><span>Notes</span>
-      <input type="text" id="fNotes" placeholder="Optional">
-    </label>
+
+    <div id="transferFields" hidden>
+      <div class="grp">
+        <span class="grp-title">From</span>
+        <div class="two">
+          <select id="tFrom" aria-label="From account"></select>
+          <div class="money">
+            <input type="text" id="tFromAmt" class="num" inputmode="decimal" placeholder="0.00" aria-label="From amount">
+            <span class="tag" id="tFromTag">USD</span>
+          </div>
+        </div>
+      </div>
+      <div class="grp">
+        <span class="grp-title">To</span>
+        <div class="two">
+          <select id="tTo" aria-label="To account"></select>
+          <div class="money">
+            <input type="text" id="tToAmt" class="num" inputmode="decimal" placeholder="0.00" aria-label="To amount">
+            <span class="tag" id="tToTag">USD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="btns">
       <button type="button" class="btn danger" id="btnDelete" hidden>Delete</button>
       <button type="button" class="btn" id="btnCancel">Cancel</button>
@@ -283,6 +348,136 @@ const el = (tag, props = {}, ...kids) => {
   kids.flat().forEach((c) => c != null && e.append(c));
   return e;
 };
+
+/* ---------- money: formatting and parsing ---------- */
+/* MONEY-START */
+const CURRENCIES = ['USD', 'CLP'];
+
+/** Number to text without symbol. CLP: 1.234.567 (no decimals). USD: 1,234,567.89 */
+function fmtPlain(n, cur) {
+  const clp = cur === 'CLP';
+  const s = Math.abs(n).toFixed(clp ? 0 : 2);
+  let [i, f] = s.split('.');
+  i = i.replace(/\B(?=(\d{3})+(?!\d))/g, clp ? '.' : ',');
+  return (n < 0 ? '-' : '') + i + (f ? '.' + f : '');
+}
+const fmtMoney = (n, cur) => (n < 0 ? '-$' : '$') + fmtPlain(Math.abs(n), cur);
+
+/** Text to number for the given currency. Returns null if there is no number. */
+function parseAmount(str, cur) {
+  let s = String(str ?? '').replace(/[^\d.,]/g, '');
+  if (!s) return null;
+  if (cur === 'CLP') {
+    const d = s.replace(/[.,]/g, '');
+    return d ? parseInt(d, 10) : null;
+  }
+  // USD: commas are thousands separators. A lone comma followed by 1-2 digits is treated as a decimal comma
+  // (some phone keyboards show a comma on the decimal key).
+  if (!s.includes('.')) {
+    const m = s.match(/^(\d[\d,]*),(\d{1,2})$/);
+    if (m) s = m[1].replace(/,/g, '') + '.' + m[2];
+  }
+  s = s.replace(/,/g, '');
+  const v = parseFloat(s);
+  return Number.isFinite(v) ? Math.round(v * 100) / 100 : null;
+}
+const cents = (n) => Math.round((Number(n) || 0) * 100);
+/* MONEY-END */
+
+/* ---------- Excel (.xlsx) writer: no libraries, works offline ---------- */
+/* XLSX-START */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(b) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < b.length; i++) c = CRC_TABLE[(c ^ b[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+/** Minimal ZIP (no compression). files: [{name, data: string | Uint8Array}] */
+function zipStore(files) {
+  const enc = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+  const now = new Date();
+  const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  for (const f of files) {
+    const name = enc.encode(f.name);
+    const data = typeof f.data === 'string' ? enc.encode(f.data) : f.data;
+    const crc = crc32(data);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true); lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true);
+    lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    parts.push(new Uint8Array(lh.buffer), name, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(10, 0, true); ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
+    ch.setUint16(28, name.length, true); ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + data.length;
+  }
+  let csize = 0;
+  central.forEach((c) => { csize += c.length; });
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, csize, true); end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, new Uint8Array(end.buffer)]);
+}
+
+const xmlEsc = (s) => String(s ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function excelSerial(s) {
+  const [d, t] = s.split('T');
+  const [y, m, da] = d.split('-').map(Number);
+  const [h, mi] = (t || '00:00').split(':').map(Number);
+  return (Date.UTC(y, m - 1, da, h, mi) - Date.UTC(1899, 11, 30)) / 864e5;
+}
+
+/** rows: [{date, type, amount (signed), currency, category, account, description}] */
+function buildXlsx(rows) {
+  const head = ['Date', 'Type', 'Amount', 'Currency', 'Category', 'Account', 'Description'];
+  const col = 'ABCDEFG';
+  const str = (ref, text, style = 0) => `<c r="${ref}" t="inlineStr" s="${style}"><is><t>${xmlEsc(text)}</t></is></c>`;
+  let sheetRows = `<row r="1">${head.map((h, i) => str(col[i] + 1, h, 2)).join('')}</row>`;
+  rows.forEach((r, i) => {
+    const n = i + 2;
+    sheetRows += `<row r="${n}">` +
+      `<c r="A${n}" s="1"><v>${excelSerial(r.date)}</v></c>` +
+      str('B' + n, r.type) +
+      `<c r="C${n}" s="${r.currency === 'CLP' ? 4 : 3}"><v>${r.amount}</v></c>` +
+      str('D' + n, r.currency) + str('E' + n, r.category) + str('F' + n, r.account) + str('G' + n, r.description) +
+      '</row>';
+  });
+  const widths = [18, 10, 16, 10, 18, 18, 36];
+  const cols = widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('');
+  const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+  const REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const PKG = 'http://schemas.openxmlformats.org/package/2006/relationships';
+  const hdr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  return zipStore([
+    { name: '[Content_Types].xml', data: hdr + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' },
+    { name: '_rels/.rels', data: hdr + `<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL}/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+    { name: 'xl/workbook.xml', data: hdr + `<workbook xmlns="${NS}" xmlns:r="${REL}"><sheets><sheet name="Entries" sheetId="1" r:id="rId1"/></sheets></workbook>` },
+    { name: 'xl/_rels/workbook.xml.rels', data: hdr + `<Relationships xmlns="${PKG}"><Relationship Id="rId1" Type="${REL}/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${REL}/styles" Target="styles.xml"/></Relationships>` },
+    { name: 'xl/styles.xml', data: hdr + `<styleSheet xmlns="${NS}"><numFmts count="3"><numFmt numFmtId="164" formatCode="yyyy\\-mm\\-dd\\ hh:mm"/><numFmt numFmtId="165" formatCode="#,##0.00"/><numFmt numFmtId="166" formatCode="#,##0"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>` },
+    { name: 'xl/worksheets/sheet1.xml', data: hdr + `<worksheet xmlns="${NS}"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${cols}</cols><sheetData>${sheetRows}</sheetData></worksheet>` }
+  ]);
+}
+/* XLSX-END */
 
 /* ---------- IndexedDB ---------- */
 const DB_NAME = 'expenses-db';
@@ -329,10 +524,12 @@ function write(storeNames, fn) {
 const PAGE = 50;
 const DEFAULT_CATEGORIES = ['Food', 'Transport', 'Housing', 'Utilities', 'Health', 'Entertainment', 'Shopping', 'Salary', 'Other'];
 const state = {
-  tx: [], cats: [], accts: [],
-  defaultAcct: null, currency: '$',
+  tx: [], cats: [], accts: [], legs: new Map(),
+  defaultAcct: null,
   filterAcct: null, limit: PAGE,
-  type: 'expense', editingId: null
+  type: 'expense',            // dialog mode: expense | income | transfer
+  editing: null,              // null (new) | {kind:'tx', id} | {kind:'transfer', fromId, toId, tid}
+  statsMonth: null
 };
 
 async function seedIfNeeded() {
@@ -341,7 +538,7 @@ async function seedIfNeeded() {
   await new Promise((resolve, reject) => {
     const t = db.transaction(['categories', 'accounts', 'settings'], 'readwrite');
     DEFAULT_CATEGORIES.forEach((name) => t.objectStore('categories').put({ name }));
-    const r = t.objectStore('accounts').add({ name: 'Cash', opening: 0 });
+    const r = t.objectStore('accounts').add({ name: 'Cash', opening: 0, currency: 'USD' });
     r.onsuccess = () => t.objectStore('settings').put({ key: 'defaultAcct', value: r.result });
     t.objectStore('settings').put({ key: 'seeded', value: true });
     t.oncomplete = resolve;
@@ -353,44 +550,73 @@ async function reload() {
   const [tx, cats, accts, settings] = await Promise.all(
     STORES.map((n) => reqP(db.transaction(n).objectStore(n).getAll()))
   );
+  // Upgrade data saved by the first version: accounts get a currency, "notes" becomes "description".
+  accts.forEach((a) => { if (!CURRENCIES.includes(a.currency)) a.currency = 'USD'; });
+  tx.forEach((t) => {
+    if (t.description === undefined) t.description = t.notes ?? '';
+    delete t.notes;
+  });
   state.tx = tx.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id));
   state.cats = cats.sort((a, b) => a.name.localeCompare(b.name));
   state.accts = accts.sort((a, b) => a.id - b.id);
   const s = Object.fromEntries(settings.map((x) => [x.key, x.value]));
-  state.currency = s.currency ?? '$';
   state.defaultAcct = state.accts.some((a) => a.id === s.defaultAcct) ? s.defaultAcct : (state.accts[0]?.id ?? null);
   if (state.filterAcct != null && !state.accts.some((a) => a.id === state.filterAcct)) state.filterAcct = null;
+  state.legs = new Map();
+  state.tx.forEach((t) => {
+    if (t.transferId) {
+      if (!state.legs.has(t.transferId)) state.legs.set(t.transferId, []);
+      state.legs.get(t.transferId).push(t);
+    }
+  });
 }
 
 const setSetting = (key, value) => write('settings', (s) => s.put({ key, value }));
 
-/* ---------- formatting & math ---------- */
-const cents = (n) => Math.round((Number(n) || 0) * 100);
-const fmt = (n) => {
-  const s = Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return (n < 0 ? '-' : '') + state.currency + s;
-};
-const acctName = (id) => state.accts.find((a) => a.id === id)?.name ?? 'Unknown account';
+/* ---------- lookups & labels ---------- */
+const acct = (id) => state.accts.find((a) => a.id === id);
+const acctName = (id) => acct(id)?.name ?? 'Unknown account';
+const acctCur = (id) => acct(id)?.currency ?? 'USD';
+const txCur = (t) => acctCur(t.accountId);
+
+/** Description shown for an entry. Transfers show the other account's current name. */
+function descOf(t) {
+  if (t.transferId) {
+    const other = (state.legs.get(t.transferId) || []).find((x) => x.id !== t.id);
+    if (other) return (t.type === 'expense' ? 'To ' : 'From ') + acctName(other.accountId);
+  }
+  return t.description || '';
+}
+function titleOf(t) {
+  const cat = t.category || 'Uncategorized';
+  const d = descOf(t);
+  return d ? `${cat} - ${d}` : cat;
+}
 
 function nowLocal() {
   const d = new Date();
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
   return d.toISOString().slice(0, 16);
 }
+/** "Sun, Oct 25" (plus " - Today" / " - Yesterday") */
 function dayLabel(key) {
-  const d = new Date(key + 'T00:00:00');
+  const [y, m, d] = key.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const diff = Math.round((today - d) / 864e5);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Yesterday';
-  return d.toLocaleDateString(undefined, {
-    weekday: 'short', day: 'numeric', month: 'short',
-    year: d.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-  });
+  const diff = Math.round((today - dt) / 864e5);
+  let s = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  if (dt.getFullYear() !== today.getFullYear()) s += ', ' + dt.getFullYear();
+  if (diff === 0) s += ' - Today';
+  else if (diff === 1) s += ' - Yesterday';
+  return s;
 }
-const timeLabel = (s) => new Date(s).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+const monthLabel = (key) => {
+  const [y, m] = key.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+};
+const timeLabel = (s) => new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-/** Balance per account, in cents: opening + income - expenses. */
+/** Balance per account in cents: opening + income - expenses (transfers included). */
 function balances() {
   const m = new Map(state.accts.map((a) => [a.id, cents(a.opening)]));
   for (const t of state.tx) {
@@ -402,32 +628,14 @@ function balances() {
 
 /* ---------- home view ---------- */
 function renderHome() {
-  const bal = balances();
-  let total = 0;
-  bal.forEach((v) => { total += v; });
-  const totalEl = $('#total');
-  totalEl.textContent = fmt(total / 100);
-  totalEl.classList.toggle('neg', total < 0);
-
-  const wrap = $('#balances');
-  wrap.replaceChildren(...state.accts.map((a) => {
-    const b = bal.get(a.id) || 0;
-    return el('button', {
-      class: 'acct' + (state.filterAcct === a.id ? ' active' : ''), type: 'button',
-      onclick: () => {
-        state.filterAcct = state.filterAcct === a.id ? null : a.id;
-        state.limit = PAGE;
-        renderHome();
-      }
-    },
-      el('span', { class: 'acct-name', text: a.name }),
-      el('span', { class: 'acct-bal' + (b < 0 ? ' neg' : ''), text: fmt(b / 100) })
-    );
-  }));
-
-  const note = $('#filterNote');
-  note.hidden = state.filterAcct == null;
-  if (state.filterAcct != null) note.textContent = `Showing only ${acctName(state.filterAcct)}. Tap the account again to show all.`;
+  $('#pills').replaceChildren(
+    el('button', { class: 'pill' + (state.filterAcct == null ? ' active' : ''), type: 'button', text: 'All',
+      onclick: () => { state.filterAcct = null; state.limit = PAGE; renderHome(); } }),
+    ...state.accts.map((a) => el('button', {
+      class: 'pill' + (state.filterAcct === a.id ? ' active' : ''), type: 'button', text: a.name,
+      onclick: () => { state.filterAcct = state.filterAcct === a.id ? null : a.id; state.limit = PAGE; renderHome(); }
+    }))
+  );
 
   const items = state.filterAcct == null ? state.tx : state.tx.filter((t) => t.accountId === state.filterAcct);
   const shown = items.slice(0, state.limit);
@@ -440,28 +648,22 @@ function renderHome() {
   }
 
   let currentDay = null;
-  let dayBlock = null;
-  const dayTotals = new Map();
-  items.forEach((t) => {
-    const k = t.date.slice(0, 10);
-    dayTotals.set(k, (dayTotals.get(k) || 0) + (t.type === 'income' ? 1 : -1) * cents(t.amount));
-  });
-
   shown.forEach((t) => {
     const k = t.date.slice(0, 10);
     if (k !== currentDay) {
       currentDay = k;
-      const dt = dayTotals.get(k) || 0;
-      dayBlock = el('div', { class: 'day' }, el('span', { text: dayLabel(k) }), el('span', { text: fmt(dt / 100) }));
-      list.append(dayBlock);
+      list.append(el('div', { class: 'day', text: dayLabel(k) }));
     }
-    const sub = [timeLabel(t.date), acctName(t.accountId), t.notes].filter(Boolean).join(', ');
+    const cur = txCur(t);
     list.append(el('button', { class: 'row', type: 'button', onclick: () => openDialog(t) },
       el('div', { class: 'row-main' },
-        el('div', { class: 'row-cat', text: t.category || 'Uncategorized' }),
-        el('div', { class: 'row-sub', text: sub })
+        el('div', { class: 'row-title', text: titleOf(t) }),
+        el('div', { class: 'row-sub', text: `${timeLabel(t.date)}, ${acctName(t.accountId)}` })
       ),
-      el('div', { class: 'row-amt ' + t.type, text: (t.type === 'income' ? '+' : '-') + fmt(t.amount) })
+      el('div', { class: 'row-amtbox' },
+        el('div', { class: 'row-amt ' + t.type, text: (t.type === 'income' ? '+' : '-') + fmtMoney(t.amount, cur) }),
+        el('div', { class: 'row-cur', text: cur })
+      )
     ));
   });
 
@@ -473,11 +675,27 @@ function renderHome() {
 /* ---------- entry dialog ---------- */
 const dlg = $('#dlg');
 
-function setType(type) {
-  state.type = type;
-  $('#segExpense').classList.toggle('on', type === 'expense');
-  $('#segIncome').classList.toggle('on', type === 'income');
+/** An amount input that formats itself for the currency of the chosen account. */
+function moneyField(input, tag, getCur) {
+  const f = {
+    cur: 'USD',
+    read() { return parseAmount(input.value, f.cur); },
+    refresh() {
+      tag.textContent = f.cur;
+      input.placeholder = f.cur === 'CLP' ? '0' : '0.00';
+      input.inputMode = f.cur === 'CLP' ? 'numeric' : 'decimal';
+    },
+    set(n) { f.cur = getCur(); input.value = n == null ? '' : fmtPlain(n, f.cur); f.refresh(); },
+    /** Call after the account (and so the currency) changed. */
+    sync() { const v = f.read(); f.cur = getCur(); input.value = v == null ? '' : fmtPlain(v, f.cur); f.refresh(); }
+  };
+  input.addEventListener('blur', () => { const v = f.read(); if (v != null) input.value = fmtPlain(v, f.cur); });
+  return f;
 }
+const entryAmt = moneyField($('#fAmount'), $('#fAmountTag'), () => acctCur(Number($('#fAccount').value)));
+const fromAmt = moneyField($('#tFromAmt'), $('#tFromTag'), () => acctCur(Number($('#tFrom').value)));
+const toAmt = moneyField($('#tToAmt'), $('#tToTag'), () => acctCur(Number($('#tTo').value)));
+let toEdited = false;
 
 function fillSelect(sel, options, selected) {
   sel.replaceChildren(...options.map((o) => {
@@ -486,21 +704,45 @@ function fillSelect(sel, options, selected) {
     return opt;
   }));
 }
+const acctOptions = () => state.accts.map((a) => ({ value: a.id, label: `${a.name} (${a.currency})` }));
+
+function setType(type) {
+  state.type = type;
+  $('#segExpense').classList.toggle('on', type === 'expense');
+  $('#segIncome').classList.toggle('on', type === 'income');
+  $('#segTransfer').classList.toggle('on', type === 'transfer');
+  const tr = type === 'transfer';
+  $('#normalAmount').hidden = tr;
+  $('#normalFields').hidden = tr;
+  $('#transferFields').hidden = !tr;
+}
+
+function setupSeg(editing) {
+  const seg = $('#seg');
+  seg.hidden = editing && editing.kind === 'transfer';
+  $('#segTransfer').hidden = !!editing;
+  seg.style.setProperty('--n', editing ? 2 : 3);
+}
 
 function openDialog(t) {
   if (!state.accts.length) { alert('Add an account in Configuration first.'); return; }
-  state.editingId = t ? t.id : null;
-  $('#dlgTitle').textContent = t ? 'Edit entry' : 'New entry';
-  setType(t ? t.type : 'expense');
-  $('#fAmount').value = t ? String(t.amount) : '';
-  $('#fDate').value = t ? t.date : nowLocal();
-  $('#fNotes').value = t ? (t.notes || '') : '';
+  const legs = t && t.transferId ? state.legs.get(t.transferId) : null;
+  const from = legs && legs.find((x) => x.type === 'expense');
+  const to = legs && legs.find((x) => x.type === 'income');
+  if (from && to) return openTransferDialog({ from, to });
 
-  const catOpts = [{ value: '', label: 'Uncategorized' }, ...state.cats.map((c) => ({ value: c.name, label: c.name }))];
+  state.editing = t ? { kind: 'tx', id: t.id } : null;
+  $('#dlgTitle').textContent = t ? 'Edit entry' : 'New entry';
+  setupSeg(state.editing);
+  setType(t ? t.type : 'expense');
+  $('#fDate').value = t ? t.date : nowLocal();
+  $('#fDesc').value = t ? (t.description || '') : '';
+
+  const catOpts = [{ value: '', label: 'Choose a category' }, ...state.cats.map((c) => ({ value: c.name, label: c.name }))];
   if (t && t.category && !state.cats.some((c) => c.name === t.category)) catOpts.push({ value: t.category, label: t.category });
   fillSelect($('#fCategory'), catOpts, t ? t.category : '');
-
-  fillSelect($('#fAccount'), state.accts.map((a) => ({ value: a.id, label: a.name })), t ? t.accountId : state.defaultAcct);
+  fillSelect($('#fAccount'), acctOptions(), t ? t.accountId : state.defaultAcct);
+  entryAmt.set(t ? t.amount : null);
 
   $('#btnDelete').hidden = !t;
   dlg.showModal();
@@ -508,53 +750,226 @@ function openDialog(t) {
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
 }
 
+function openTransferDialog(legs) {
+  if (state.accts.length < 2) { alert('Transfers need at least two accounts. Add another one in Configuration.'); return; }
+  const editing = legs ? { kind: 'transfer', fromId: legs.from.id, toId: legs.to.id, tid: legs.from.transferId } : null;
+  state.editing = editing;
+  $('#dlgTitle').textContent = legs ? 'Edit transfer' : 'New entry';
+  setupSeg(editing);
+  setType('transfer');
+  $('#fDate').value = legs ? legs.from.date : nowLocal();
+  const fromAcct = legs ? legs.from.accountId : state.defaultAcct;
+  const toAcct = legs ? legs.to.accountId : (state.accts.find((a) => a.id !== fromAcct) || state.accts[0]).id;
+  fillSelect($('#tFrom'), acctOptions(), fromAcct);
+  fillSelect($('#tTo'), acctOptions(), toAcct);
+  fromAmt.set(legs ? legs.from.amount : null);
+  toAmt.set(legs ? legs.to.amount : null);
+  toEdited = !!legs;
+  $('#btnDelete').hidden = !legs;
+  dlg.showModal();
+  if (!legs) $('#tFromAmt').focus();
+}
+
+function openFromSegment() {
+  // Switching to Transfer while adding a new entry
+  if (state.accts.length < 2) { alert('Transfers need at least two accounts. Add another one in Configuration.'); return; }
+  const date = $('#fDate').value;
+  const amount = entryAmt.read();
+  openTransferDialogInPlace(date, amount);
+}
+function openTransferDialogInPlace(date, amount) {
+  $('#dlgTitle').textContent = 'New entry';
+  setType('transfer');
+  const fromAcct = Number($('#fAccount').value) || state.defaultAcct;
+  const toAcct = (state.accts.find((a) => a.id !== fromAcct) || state.accts[0]).id;
+  fillSelect($('#tFrom'), acctOptions(), fromAcct);
+  fillSelect($('#tTo'), acctOptions(), toAcct);
+  $('#fDate').value = date || nowLocal();
+  fromAmt.set(amount);
+  toAmt.set(null);
+  toEdited = false;
+  mirrorTo();
+  $('#tFromAmt').focus();
+}
+
+/** When both accounts share a currency and "To" was not typed by hand, "To" follows "From". */
+function mirrorTo() {
+  if (toEdited) return;
+  const same = fromAmt.cur === toAmt.cur;
+  $('#tToAmt').value = same ? $('#tFromAmt').value : '';
+}
+
 $('#btnAdd').addEventListener('click', () => openDialog(null));
-$('#segExpense').addEventListener('click', () => setType('expense'));
-$('#segIncome').addEventListener('click', () => setType('income'));
+$('#segExpense').addEventListener('click', () => {
+  if (state.type === 'transfer') { backToNormal(); }
+  setType('expense');
+});
+$('#segIncome').addEventListener('click', () => {
+  if (state.type === 'transfer') { backToNormal(); }
+  setType('income');
+});
+$('#segTransfer').addEventListener('click', () => { if (state.type !== 'transfer') openFromSegment(); });
+
+/** Returning from the Transfer tab to Expense/Income while adding. */
+function backToNormal() {
+  $('#fAmount').value = $('#tFromAmt').value;
+  entryAmt.cur = fromAmt.cur;
+  fillSelect($('#fAccount'), acctOptions(), Number($('#tFrom').value));
+  entryAmt.sync();
+}
+
+$('#fAccount').addEventListener('change', () => entryAmt.sync());
+$('#tFrom').addEventListener('change', () => { fromAmt.sync(); toAmt.sync(); mirrorTo(); });
+$('#tTo').addEventListener('change', () => { toAmt.sync(); mirrorTo(); });
+$('#tFromAmt').addEventListener('input', () => mirrorTo());
+$('#tFromAmt').addEventListener('blur', () => mirrorTo());
+$('#tToAmt').addEventListener('input', () => { toEdited = true; });
+
 $('#btnCancel').addEventListener('click', () => dlg.close());
 dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
 
 $('#entryForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const amount = parseFloat(String($('#fAmount').value).trim().replace(',', '.'));
-  if (!(amount > 0)) { $('#fAmount').focus(); alert('Enter an amount greater than zero.'); return; }
-  const rec = {
-    type: state.type,
-    amount: Math.round(amount * 100) / 100,
-    date: $('#fDate').value || nowLocal(),
-    category: $('#fCategory').value,
-    accountId: Number($('#fAccount').value),
-    notes: $('#fNotes').value.trim()
-  };
-  if (state.editingId != null) rec.id = state.editingId;
-  await write('transactions', (s) => s.put(rec));
+  const date = $('#fDate').value || nowLocal();
+
+  if (state.type === 'transfer') {
+    const fromId = Number($('#tFrom').value);
+    const toId = Number($('#tTo').value);
+    const a = fromAmt.read();
+    const b = toAmt.read();
+    if (fromId === toId) { alert('Choose two different accounts.'); return; }
+    if (!(a > 0)) { $('#tFromAmt').focus(); alert('Enter the amount that leaves the "From" account.'); return; }
+    if (!(b > 0)) { $('#tToAmt').focus(); alert('Enter the amount that arrives in the "To" account.'); return; }
+    const ed = state.editing && state.editing.kind === 'transfer' ? state.editing : null;
+    const tid = ed ? ed.tid : 'tr' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const legFrom = { type: 'expense', amount: a, date, category: 'Transfer', accountId: fromId, description: 'To ' + acctName(toId), transferId: tid };
+    const legTo = { type: 'income', amount: b, date, category: 'Transfer', accountId: toId, description: 'From ' + acctName(fromId), transferId: tid };
+    if (ed) { legFrom.id = ed.fromId; legTo.id = ed.toId; }
+    await write('transactions', (s) => { s.put(legFrom); return s.put(legTo); });
+  } else {
+    const amount = entryAmt.read();
+    if (!(amount > 0)) { $('#fAmount').focus(); alert('Enter an amount greater than zero.'); return; }
+    const category = $('#fCategory').value;
+    if (!category) { $('#fCategory').focus(); alert('Choose a category.'); return; }
+    const rec = {
+      type: state.type, amount, date, category,
+      accountId: Number($('#fAccount').value),
+      description: $('#fDesc').value.trim()
+    };
+    if (state.editing && state.editing.kind === 'tx') rec.id = state.editing.id;
+    await write('transactions', (s) => s.put(rec));
+  }
   dlg.close();
   await reload();
   renderHome();
 });
 
 $('#btnDelete').addEventListener('click', async () => {
-  if (state.editingId == null) return;
-  if (!confirm('Delete this entry?')) return;
-  await write('transactions', (s) => s.delete(state.editingId));
+  const ed = state.editing;
+  if (!ed) return;
+  if (!confirm(ed.kind === 'transfer' ? 'Delete this transfer (both entries)?' : 'Delete this entry?')) return;
+  await write('transactions', (s) => {
+    if (ed.kind === 'transfer') { s.delete(ed.fromId); return s.delete(ed.toId); }
+    return s.delete(ed.id);
+  });
   dlg.close();
   await reload();
   renderHome();
 });
 
-/* ---------- settings view ---------- */
+/* ---------- views ---------- */
 function showView(name) {
   $('#home').hidden = name !== 'home';
+  $('#stats').hidden = name !== 'stats';
   $('#settings').hidden = name !== 'settings';
   $('#btnAdd').hidden = name !== 'home';
   window.scrollTo(0, 0);
-  if (name === 'home') renderHome(); else renderSettings();
+  if (name === 'home') renderHome();
+  else if (name === 'stats') { state.statsMonth = null; renderStats(); }
+  else renderSettings();
 }
 $('#btnSettings').addEventListener('click', () => showView('settings'));
+$('#btnStats').addEventListener('click', () => showView('stats'));
 $('#btnBack').addEventListener('click', () => showView('home'));
+$('#btnStatsBack').addEventListener('click', () => {
+  if (state.statsMonth) { state.statsMonth = null; renderStats(); window.scrollTo(0, 0); }
+  else showView('home');
+});
 
+/* ---------- stats view ---------- */
+/** Income and expense totals (in cents, per currency) grouped by month (len 7) or day (len 10).
+ *  Transfers are left out: they only move money between accounts. */
+function aggregate(len, monthPrefix) {
+  const map = new Map();
+  for (const t of state.tx) {
+    if (t.transferId) continue;
+    const k = t.date.slice(0, len);
+    if (monthPrefix && !k.startsWith(monthPrefix)) continue;
+    const cur = txCur(t);
+    const e = map.get(k) || {};
+    const c = e[cur] || (e[cur] = { inc: 0, exp: 0 });
+    if (t.type === 'income') c.inc += cents(t.amount); else c.exp += cents(t.amount);
+    map.set(k, e);
+  }
+  return [...map.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+}
+
+function periodBlock(title, data, onclick) {
+  const rows = CURRENCIES.filter((c) => data[c]).map((c) => el('div', { class: 'prow' },
+    el('span', { class: 'pcode', text: c }),
+    el('span', { class: 'pinc', text: data[c].inc ? '+' + fmtMoney(data[c].inc / 100, c) : '–' }),
+    el('span', { class: 'pexp', text: data[c].exp ? '-' + fmtMoney(data[c].exp / 100, c) : '–' })
+  ));
+  const props = { class: 'pblock' + (onclick ? ' tappable' : '') };
+  if (onclick) { props.type = 'button'; props.onclick = onclick; }
+  return el(onclick ? 'button' : 'div', props, el('div', { class: 'ptitle', text: title }), rows);
+}
+
+function balLine(name, cur, cents_, extra = '') {
+  return el('div', { class: 'bal-line ' + extra },
+    el('span', { class: 'nm', text: name }),
+    el('span', { class: 'amt' + (cents_ < 0 ? ' neg' : ''), text: fmtMoney(cents_ / 100, cur) }, el('span', { class: 'code', text: cur }))
+  );
+}
+
+function renderStats() {
+  const body = $('#statsBody');
+  body.replaceChildren();
+  const month = state.statsMonth;
+  $('#statsTitle').textContent = month ? monthLabel(month) : 'Stats';
+
+  if (!month) {
+    const bal = balances();
+    const totals = {};
+    state.accts.forEach((a) => { totals[a.currency] = (totals[a.currency] || 0) + (bal.get(a.id) || 0); });
+
+    body.append(el('section', { class: 'sec' }, el('h2', { text: 'Total balance' }),
+      ...CURRENCIES.filter((c) => totals[c] !== undefined).map((c) => balLine(c === 'USD' ? 'US dollars' : 'Chilean pesos', c, totals[c], 'bal-total'))));
+
+    body.append(el('section', { class: 'sec' }, el('h2', { text: 'Accounts' }),
+      ...state.accts.map((a) => balLine(a.name, a.currency, bal.get(a.id) || 0))));
+
+    const months = aggregate(7);
+    const sec = el('section', { class: 'sec' }, el('h2', { text: 'By month' }));
+    if (!months.length) {
+      sec.append(el('div', { class: 'empty', text: 'Income and expenses will show up here by month.' }));
+    } else {
+      sec.append(el('div', { class: 'pcols' }, el('span'), el('span', { text: 'Income' }), el('span', { text: 'Expenses' })));
+      months.forEach(([k, data]) => sec.append(periodBlock(monthLabel(k), data, () => { state.statsMonth = k; renderStats(); window.scrollTo(0, 0); })));
+      sec.append(el('p', { class: 'footnote', text: 'Transfers between your accounts are not counted as income or expenses.' }));
+    }
+    body.append(sec);
+  } else {
+    const days = aggregate(10, month);
+    const sec = el('section', { class: 'sec' });
+    sec.append(el('div', { class: 'pcols' }, el('span'), el('span', { text: 'Income' }), el('span', { text: 'Expenses' })));
+    days.forEach(([k, data]) => sec.append(periodBlock(dayLabel(k), data)));
+    body.append(sec);
+  }
+}
+
+/* ---------- settings view ---------- */
 function renderSettings() {
-  /* accounts */
   $('#acctList').replaceChildren(...state.accts.map((a) => {
     const nameIn = el('input', { type: 'text', 'aria-label': 'Account name', autocomplete: 'off' });
     nameIn.value = a.name;
@@ -565,12 +980,29 @@ function renderSettings() {
       await write('accounts', (s) => s.put(a));
     });
 
+    const curSel = el('select', { 'aria-label': 'Currency' });
+    fillSelect(curSel, CURRENCIES.map((c) => ({ value: c, label: c })), a.currency);
+
     const openIn = el('input', { type: 'text', inputmode: 'decimal', 'aria-label': 'Opening balance', autocomplete: 'off' });
-    openIn.value = a.opening ? String(a.opening) : '0';
+    const showOpen = () => { openIn.value = fmtPlain(a.opening || 0, a.currency); };
+    showOpen();
     openIn.addEventListener('change', async () => {
-      const v = parseFloat(openIn.value.replace(',', '.'));
-      a.opening = Number.isFinite(v) ? Math.round(v * 100) / 100 : 0;
-      openIn.value = String(a.opening);
+      const neg = /^\s*-/.test(openIn.value);
+      const v = parseAmount(openIn.value, a.currency);
+      a.opening = v == null ? 0 : (neg ? -v : v);
+      showOpen();
+      await write('accounts', (s) => s.put(a));
+    });
+
+    curSel.addEventListener('change', async () => {
+      if (state.tx.some((t) => t.accountId === a.id)) {
+        alert(`"${a.name}" already has entries, so its currency cannot be changed.`);
+        curSel.value = a.currency;
+        return;
+      }
+      a.currency = curSel.value;
+      a.opening = parseAmount(String(a.opening || 0), a.currency) || 0;
+      showOpen();
       await write('accounts', (s) => s.put(a));
     });
 
@@ -591,14 +1023,19 @@ function renderSettings() {
       if (!confirm(`Delete the account "${a.name}"?`)) return;
       await write('accounts', (s) => s.delete(a.id));
       await reload();
-      if (state.defaultAcct !== a.id) await setSetting('defaultAcct', state.defaultAcct);
+      await setSetting('defaultAcct', state.defaultAcct);
       renderSettings();
     });
 
-    return el('div', { class: 'acct-row' }, nameIn, openIn, el('label', { class: 'def' }, radio, 'Default'), delBtn);
+    return el('div', { class: 'acct-card' }, nameIn,
+      el('div', { class: 'acct-meta' }, curSel,
+        el('label', { class: 'open' }, el('span', { text: 'Opening balance' }), openIn),
+        el('label', { class: 'def' }, radio, 'Default'),
+        delBtn));
   }));
 
-  /* categories */
+  fillSelect($('#newAcctCur'), CURRENCIES.map((c) => ({ value: c, label: c })), 'USD');
+
   $('#catList').replaceChildren(...state.cats.map((c) => {
     const x = el('button', { type: 'button', 'aria-label': `Remove ${c.name}`, text: '×' });
     x.addEventListener('click', async () => {
@@ -609,8 +1046,6 @@ function renderSettings() {
     });
     return el('span', { class: 'chip' }, el('span', { text: c.name }), x);
   }));
-
-  $('#currency').value = state.currency;
 
   if (navigator.storage && navigator.storage.persisted) {
     navigator.storage.persisted().then((p) => {
@@ -626,10 +1061,8 @@ $('#addAcctForm').addEventListener('submit', async (e) => {
   const name = $('#newAcctName').value.trim();
   if (!name) { $('#newAcctName').focus(); return; }
   if (state.accts.some((a) => a.name.toLowerCase() === name.toLowerCase())) { alert('An account with that name already exists.'); return; }
-  const opening = parseFloat($('#newAcctOpen').value.replace(',', '.'));
-  await write('accounts', (s) => s.add({ name, opening: Number.isFinite(opening) ? Math.round(opening * 100) / 100 : 0 }));
+  await write('accounts', (s) => s.add({ name, opening: 0, currency: $('#newAcctCur').value }));
   $('#newAcctName').value = '';
-  $('#newAcctOpen').value = '';
   await reload();
   renderSettings();
 });
@@ -638,6 +1071,7 @@ $('#addCatForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = $('#newCatName').value.trim();
   if (!name) { $('#newCatName').focus(); return; }
+  if (name.toLowerCase() === 'transfer') { alert('"Transfer" is reserved for transfers between accounts.'); return; }
   if (state.cats.some((c) => c.name.toLowerCase() === name.toLowerCase())) { alert('That category already exists.'); return; }
   await write('categories', (s) => s.put({ name }));
   $('#newCatName').value = '';
@@ -645,14 +1079,9 @@ $('#addCatForm').addEventListener('submit', async (e) => {
   renderSettings();
 });
 
-$('#currency').addEventListener('change', async () => {
-  state.currency = $('#currency').value.trim();
-  await setSetting('currency', state.currency);
-});
-
 /* ---------- export / backup / restore ---------- */
-async function saveFile(name, text, mime) {
-  const file = new File([text], name, { type: mime });
+async function saveFile(name, data, mime) {
+  const file = new File([data], name, { type: mime });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file], title: name }); return; }
     catch (err) { if (err && err.name === 'AbortError') return; }
@@ -667,19 +1096,33 @@ async function saveFile(name, text, mime) {
 
 const stamp = () => new Date().toISOString().slice(0, 10);
 
+/** One flat list of entries for CSV / Excel, oldest first. Amount is negative for expenses. */
+function exportRows() {
+  return [...state.tx].reverse().map((t) => ({
+    date: t.date,
+    type: t.type === 'income' ? 'Income' : 'Expense',
+    amount: (t.type === 'income' ? 1 : -1) * t.amount,
+    currency: txCur(t),
+    category: t.category || '',
+    account: acctName(t.accountId),
+    description: descOf(t)
+  }));
+}
+
 $('#btnCsv').addEventListener('click', () => {
   const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Date', 'Type', 'Amount', 'Category', 'Account', 'Notes']];
-  [...state.tx].reverse().forEach((t) => {
-    const signed = (t.type === 'income' ? 1 : -1) * t.amount;
-    rows.push([t.date.replace('T', ' '), t.type, signed.toFixed(2), t.category, acctName(t.accountId), t.notes]);
-  });
+  const rows = [['Date', 'Type', 'Amount', 'Currency', 'Category', 'Account', 'Description']];
+  exportRows().forEach((r) => rows.push([r.date.replace('T', ' '), r.type, r.currency === 'CLP' ? r.amount.toFixed(0) : r.amount.toFixed(2), r.currency, r.category, r.account, r.description]));
   const csv = '\uFEFF' + rows.map((r) => r.map(q).join(',')).join('\r\n');
   saveFile(`expenses-${stamp()}.csv`, csv, 'text/csv');
 });
 
+$('#btnXlsx').addEventListener('click', () => {
+  saveFile(`expenses-${stamp()}.xlsx`, buildXlsx(exportRows()), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+});
+
 $('#btnBackup').addEventListener('click', async () => {
-  const data = { app: 'expense-tracker', version: 1, exported: new Date().toISOString() };
+  const data = { app: 'expense-tracker', version: 2, exported: new Date().toISOString() };
   for (const n of STORES) data[n] = await reqP(db.transaction(n).objectStore(n).getAll());
   saveFile(`expenses-backup-${stamp()}.json`, JSON.stringify(data, null, 2), 'application/json');
 });
