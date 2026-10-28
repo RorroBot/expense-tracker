@@ -22,6 +22,10 @@
   --accent-ink: #ffffff;
   --income: #1b7f4f;
   --expense: #b3261e;
+  --pill: #e4e8fb;
+  --pill-ink: #27389f;
+  --warn-bg: #fff4e0;
+  --warn-ink: #7a4b00;
   --shadow: 0 6px 18px rgba(28, 36, 51, .22);
   color-scheme: light;
 }
@@ -36,6 +40,10 @@
     --accent-ink: #0d1020;
     --income: #4cc38a;
     --expense: #ff7b72;
+    --pill: #2a3358;
+    --pill-ink: #b9c4ff;
+    --warn-bg: #3a2e12;
+    --warn-ink: #ffd58a;
     --shadow: 0 6px 18px rgba(0, 0, 0, .5);
     color-scheme: dark;
   }
@@ -54,38 +62,41 @@ button { font: inherit; color: inherit; }
 
 /* header */
 .top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 6px; }
-.top h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.top h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
 .hdr-btns { display: flex; gap: 2px; }
 .icon-btn {
-  width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent;
+  position: relative; width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent;
   display: grid; place-items: center; cursor: pointer;
 }
 .icon-btn:active { background: var(--rule); }
 .icon-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-/* account filter */
-.pills { display: flex; gap: 8px; overflow-x: auto; padding: 8px 16px 10px; margin: 0 -16px; }
-.pills::-webkit-scrollbar { display: none; }
-.pill {
-  flex: 0 0 auto; border: 1.5px solid var(--rule); background: var(--card); border-radius: 999px;
-  padding: 8px 16px; cursor: pointer; white-space: nowrap; font-weight: 550;
-}
-.pill.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.icon-btn.active { color: var(--accent); }
+.icon-btn.active::after { content: ""; position: absolute; top: 8px; right: 8px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 2px solid var(--paper); }
+.filter-note { color: var(--muted); font-size: 13px; padding: 2px 0 0; }
 
 /* ledger */
-.day { margin-top: 14px; padding-bottom: 4px; border-bottom: 1.5px solid var(--ink); font-size: 14px; font-weight: 650; }
+#list > .day:first-child { margin-top: 14px; }
+.day { margin-top: 34px; padding-bottom: 6px; border-bottom: 4px double var(--ink); font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
 .row {
   display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px;
   text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule);
-  padding: 12px 2px; cursor: pointer; min-height: 60px;
+  padding: 12px 2px; cursor: pointer; min-height: 62px;
 }
 .row:active { background: var(--rule); }
-.row-main { min-width: 0; }
-.row-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row-sub { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row.static { cursor: default; }
+.row.static:active { background: transparent; }
+.row-main { min-width: 0; flex: 1; }
+.row-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cat-pill {
+  flex: 0 1 auto; max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  background: var(--pill); color: var(--pill-ink); border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 650;
+}
+.row-desc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-sub { color: var(--muted); font-size: 13px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-amtbox { text-align: right; flex: 0 0 auto; }
 .row-amt { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .row-amt.income { color: var(--income); }
+.row-amt.expense { color: var(--expense); }
 .row-cur { font-size: 11px; color: var(--muted); line-height: 1.2; }
 .empty { text-align: center; color: var(--muted); padding: 48px 12px; }
 .more { display: block; margin: 18px auto 0; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--rule); background: var(--card); cursor: pointer; }
@@ -99,7 +110,7 @@ button { font: inherit; color: inherit; }
 .fab:active { transform: scale(.97); }
 .fab svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.4; fill: none; stroke-linecap: round; }
 
-/* dialog */
+/* dialogs */
 dialog {
   border: 0; padding: 0; border-radius: 18px; width: min(480px, calc(100vw - 20px)); max-height: calc(100dvh - 24px);
   background: var(--card); color: var(--ink); box-shadow: var(--shadow); overflow: auto;
@@ -107,6 +118,9 @@ dialog {
 dialog::backdrop { background: rgba(10, 14, 24, .5); }
 .dlg { padding: 18px 18px 16px; }
 .dlg h2 { margin: 0 0 12px; font-size: 18px; }
+.dlg h2:focus { outline: none; }
+.dlg p { margin: 0 0 10px; }
+.warn { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
 .seg { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); background: var(--paper); border-radius: 12px; padding: 4px; margin-bottom: 14px; }
 .seg button { border: 0; background: transparent; padding: 10px 4px; border-radius: 9px; font-weight: 600; color: var(--muted); cursor: pointer; }
 .seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.18); }
@@ -129,38 +143,49 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .grp { margin-bottom: 12px; }
 .btns { display: flex; gap: 10px; margin-top: 16px; }
+.btns.stack { flex-direction: column; }
 .btn {
   flex: 1; min-height: 48px; border-radius: 12px; border: 1.5px solid var(--rule); background: var(--card);
-  font-weight: 650; cursor: pointer;
+  font-weight: 650; cursor: pointer; padding: 0 14px;
 }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn.danger { color: var(--expense); flex: 0 0 auto; padding: 0 16px; }
+.btn.danger { color: var(--expense); }
+.btns .btn.danger.solo { flex: 0 0 auto; }
 .btn:active { opacity: .8; }
 
+/* filter menu */
+.flt-list { max-height: 46vh; overflow-y: auto; margin: 0 -4px; padding: 0 4px; }
+.opt-head { font-size: 13px; color: var(--muted); margin: 12px 0 2px; }
+.opt { display: flex; width: 100%; align-items: center; gap: 8px; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 12px 2px; min-height: 48px; cursor: pointer; }
+.opt .sub { color: var(--muted); font-size: 12px; }
+.opt .chk { margin-left: auto; color: var(--accent); font-weight: 700; width: 20px; text-align: right; }
+.opt.on { font-weight: 650; }
+
 /* settings */
-.sec { margin-top: 22px; }
+.sec { margin-top: 24px; }
+.sec-head { display: flex; align-items: center; justify-content: space-between; }
 .sec h2 { font-size: 17px; margin: 0 0 4px; }
-.sec p.hint { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
-.acct-card { padding: 10px 0 12px; border-bottom: 1px solid var(--rule); }
-.acct-card > input { margin-bottom: 8px; }
-.acct-meta { display: flex; align-items: flex-end; gap: 8px; }
-.acct-meta select { width: 88px; min-height: 42px; flex: 0 0 auto; }
-.open { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); }
-.open input { min-height: 42px; margin-top: 2px; }
-.def { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); white-space: nowrap; height: 42px; }
-.def input { width: 20px; height: 20px; accent-color: var(--accent); }
-.mini { width: 40px; height: 42px; border-radius: 10px; border: 0; background: transparent; color: var(--expense); font-size: 22px; cursor: pointer; flex: 0 0 auto; }
-.mini:active { background: var(--rule); }
-.add-row { display: grid; grid-template-columns: 1fr 88px auto; gap: 8px; margin-top: 12px; }
-.add-row .btn { flex: none; min-height: 46px; padding: 0 16px; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
-.chip { display: inline-flex; align-items: center; gap: 4px; background: var(--card); border: 1.5px solid var(--rule); border-radius: 999px; padding: 4px 4px 4px 12px; }
-.chip button { width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
-.chip button:active { background: var(--rule); }
-.add-cat { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
-.add-cat .btn { flex: none; padding: 0 16px; min-height: 46px; }
+.sec p.hint { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+.link { background: transparent; border: 0; color: var(--accent); font-weight: 600; padding: 8px 4px; cursor: pointer; }
+.line { display: grid; grid-template-columns: 1fr 52px 44px 44px; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--rule); min-height: 52px; }
+.line.cat { grid-template-columns: 1fr 44px 44px; }
+.line.head { min-height: 0; padding: 2px 0; color: var(--muted); font-size: 12px; border-bottom: 1.5px solid var(--ink); }
+.line.head span:nth-child(n+3) { text-align: center; }
+.line input[type=text] { min-height: 40px; padding: 6px 10px; }
+.line .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.line .cur { font-size: 13px; color: var(--muted); }
+.line .rad { display: grid; place-items: center; }
+.line .rad input { width: 22px; height: 22px; accent-color: var(--accent); }
+.sq { width: 44px; height: 40px; border-radius: 10px; border: 0; background: transparent; font-size: 20px; line-height: 1; cursor: pointer; }
+.sq:active { background: var(--rule); }
+.sq.del { color: var(--expense); }
+.sq[disabled] { opacity: .25; }
+.add-acct { margin-top: 12px; display: grid; gap: 8px; }
+.add-acct .r2 { display: grid; grid-template-columns: 90px 1fr auto; gap: 8px; }
+.add-acct .btn, .add-cat .btn { flex: none; min-height: 46px; padding: 0 18px; }
+.add-cat { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; }
 .data-btns { display: grid; gap: 8px; }
-.data-btns .btn { flex: none; text-align: left; padding: 0 14px; }
+.data-btns .btn { flex: none; text-align: left; }
 
 /* stats */
 .bal-line { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); }
@@ -169,17 +194,22 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .bal-line .amt.neg { color: var(--expense); }
 .bal-line .code { display: block; font-size: 11px; font-weight: 400; color: var(--muted); line-height: 1.2; }
 .bal-total .amt { font-size: 22px; }
-.pcols, .prow { display: grid; grid-template-columns: 44px 1fr 1fr; gap: 6px; align-items: baseline; }
-.pcols { color: var(--muted); font-size: 13px; text-align: right; padding: 0 2px; margin-top: 10px; }
-.pblock { display: block; width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 12px 2px; }
-button.pblock { cursor: pointer; }
-button.pblock:active { background: var(--rule); }
-.ptitle { font-weight: 650; margin-bottom: 4px; display: flex; justify-content: space-between; }
-.tappable .ptitle::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-top: 2px solid var(--muted); transform: rotate(45deg); margin: 6px 4px 0 0; }
-.prow { font-variant-numeric: tabular-nums; }
-.pcode { font-size: 11px; color: var(--muted); }
-.pinc { color: var(--income); text-align: right; }
-.pexp { text-align: right; }
+.mblock { display: block; width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 14px 2px; cursor: pointer; }
+.mblock:active { background: var(--rule); }
+.mtitle { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 17px; margin-bottom: 4px; }
+.mtitle::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin: -2px 6px 0 0; transition: transform .15s; }
+.mblock.open .mtitle::after { transform: rotate(-135deg); margin-top: 4px; }
+.mcode { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.srow { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; padding: 1px 0; }
+.srow .inc { color: var(--income); }
+.srow .exp { color: var(--expense); }
+.srow.tot { font-weight: 700; border-top: 1px solid var(--rule); margin-top: 3px; padding-top: 4px; }
+.tree { margin: 8px 0 4px 6px; padding-left: 12px; border-left: 2px solid var(--rule); }
+.tree-title { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.trow { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-size: 15px; font-variant-numeric: tabular-nums; }
+.trow .tn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trow.income .ta { color: var(--income); }
+.trow.expense .ta { color: var(--expense); }
 .footnote { color: var(--muted); font-size: 13px; margin-top: 14px; }
 [hidden] { display: none !important; }
 @media (prefers-reduced-motion: no-preference) {
@@ -194,6 +224,9 @@ button.pblock:active { background: var(--rule); }
   <header class="top">
     <h1>Expenses</h1>
     <div class="hdr-btns">
+      <button class="icon-btn" id="btnFilter" aria-label="Filter entries">
+        <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8.5V20l-4-2v-4.5z"/></svg>
+      </button>
       <button class="icon-btn" id="btnStats" aria-label="Stats">
         <svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>
       </button>
@@ -202,8 +235,7 @@ button.pblock:active { background: var(--rule); }
       </button>
     </div>
   </header>
-
-  <section class="pills" id="pills" aria-label="Filter by account"></section>
+  <div class="filter-note" id="filterNote" hidden></div>
   <section id="list" aria-label="Recent entries"></section>
 </main>
 
@@ -213,7 +245,7 @@ button.pblock:active { background: var(--rule); }
     <button class="icon-btn" id="btnStatsBack" aria-label="Back">
       <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <h1 id="statsTitle">Stats</h1>
+    <h1>Stats</h1>
     <span style="width:44px"></span>
   </header>
   <div id="statsBody"></div>
@@ -230,29 +262,40 @@ button.pblock:active { background: var(--rule); }
   </header>
 
   <section class="sec">
-    <h2>Accounts</h2>
-    <p class="hint">Each account has its own currency. The default account is preselected when you add an entry.</p>
+    <div class="sec-head"><h2>Accounts</h2><button class="link" type="button" id="reorderAccts">Reorder</button></div>
+    <p class="hint">The default account is preselected when you add an entry. Currency cannot be changed after an account is created.</p>
     <div id="acctList"></div>
-    <form class="add-row" id="addAcctForm">
-      <input type="text" id="newAcctName" placeholder="New account name" autocomplete="off">
-      <select id="newAcctCur" aria-label="Currency"></select>
+    <form class="add-acct" id="addAcctForm" autocomplete="off">
+      <input type="text" id="newAcctName" placeholder="New account name">
+      <div class="r2">
+        <select id="newAcctCur" aria-label="Currency"></select>
+        <input type="text" id="newAcctOpen" placeholder="Opening balance" inputmode="decimal" aria-label="Opening balance">
+        <button class="btn primary" type="submit">Add</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><h2>Expense categories</h2><button class="link" type="button" id="reorderExpense">Reorder</button></div>
+    <div id="catExpense"></div>
+    <form class="add-cat" id="addCatExpense" autocomplete="off">
+      <input type="text" id="newCatExpense" placeholder="New expense category">
       <button class="btn primary" type="submit">Add</button>
     </form>
   </section>
 
   <section class="sec">
-    <h2>Categories</h2>
-    <p class="hint">Removing a category does not change past entries.</p>
-    <div class="chips" id="catList"></div>
-    <form class="add-cat" id="addCatForm">
-      <input type="text" id="newCatName" placeholder="New category" autocomplete="off">
+    <div class="sec-head"><h2>Income categories</h2><button class="link" type="button" id="reorderIncome">Reorder</button></div>
+    <div id="catIncome"></div>
+    <form class="add-cat" id="addCatIncome" autocomplete="off">
+      <input type="text" id="newCatIncome" placeholder="New income category">
       <button class="btn primary" type="submit">Add</button>
     </form>
   </section>
 
   <section class="sec">
     <h2>Your data</h2>
-    <p class="hint" id="persistNote">Everything is stored on this device only. Back up regularly.</p>
+    <p class="hint" id="persistNote">Everything is stored on this device only. Back up regularly. Backups include your accounts and category lists.</p>
     <div class="data-btns">
       <button class="btn" id="btnXlsx" type="button">Export entries to Excel (.xlsx)</button>
       <button class="btn" id="btnCsv" type="button">Export entries as CSV</button>
@@ -271,12 +314,16 @@ button.pblock:active { background: var(--rule); }
 <!-- ENTRY DIALOG -->
 <dialog id="dlg">
   <form class="dlg" id="entryForm" autocomplete="off">
-    <h2 id="dlgTitle">New entry</h2>
+    <h2 id="dlgTitle" tabindex="-1">New entry</h2>
     <div class="seg" id="seg" role="group" aria-label="Entry type">
       <button type="button" id="segExpense" class="expense on">Expense</button>
       <button type="button" id="segIncome" class="income">Income</button>
       <button type="button" id="segTransfer" class="transfer">Transfer</button>
     </div>
+
+    <label class="field"><span>Date and time</span>
+      <input type="datetime-local" id="fDate">
+    </label>
 
     <div id="normalAmount">
       <label class="field"><span>Amount</span>
@@ -286,10 +333,6 @@ button.pblock:active { background: var(--rule); }
         </div>
       </label>
     </div>
-
-    <label class="field"><span>Date and time</span>
-      <input type="datetime-local" id="fDate">
-    </label>
 
     <div id="normalFields">
       <div class="two">
@@ -325,11 +368,36 @@ button.pblock:active { background: var(--rule); }
     </div>
 
     <div class="btns">
-      <button type="button" class="btn danger" id="btnDelete" hidden>Delete</button>
+      <button type="button" class="btn danger solo" id="btnDelete" hidden>Delete</button>
       <button type="button" class="btn" id="btnCancel">Cancel</button>
       <button type="submit" class="btn primary">Save</button>
     </div>
   </form>
+</dialog>
+
+<!-- FILTER MENU -->
+<dialog id="dlgFilter">
+  <div class="dlg">
+    <h2 tabindex="-1" id="fltTitle">Filter entries</h2>
+    <div class="seg" style="--n:2" role="group" aria-label="Filter by">
+      <button type="button" id="fltTabAcct" class="on">Account</button>
+      <button type="button" id="fltTabCat">Category</button>
+    </div>
+    <div class="flt-list" id="fltList"></div>
+    <div class="btns">
+      <button type="button" class="btn" id="fltReset">Reset all filters</button>
+      <button type="button" class="btn primary" id="fltDone">Done</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- GENERIC QUESTION DIALOG -->
+<dialog id="dlgAsk">
+  <div class="dlg">
+    <h2 tabindex="-1" id="askTitle"></h2>
+    <div id="askBody"></div>
+    <div class="btns stack" id="askBtns"></div>
+  </div>
 </dialog>
 
 <script>
@@ -348,8 +416,8 @@ const el = (tag, props = {}, ...kids) => {
   kids.flat().forEach((c) => c != null && e.append(c));
   return e;
 };
+const para = (text, cls) => el('p', cls ? { class: cls, text } : { text });
 
-/* ---------- money: formatting and parsing ---------- */
 /* MONEY-START */
 const CURRENCIES = ['USD', 'CLP'];
 
@@ -384,7 +452,6 @@ function parseAmount(str, cur) {
 const cents = (n) => Math.round((Number(n) || 0) * 100);
 /* MONEY-END */
 
-/* ---------- Excel (.xlsx) writer: no libraries, works offline ---------- */
 /* XLSX-START */
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);
@@ -479,23 +546,69 @@ function buildXlsx(rows) {
 }
 /* XLSX-END */
 
+/* ---------- constants & default categories ---------- */
+const OPENING = 'Opening Balance';
+const TRANSFER = 'Transfer';
+
+const DEFAULT_EXPENSE_CATS = [
+  'Groceries', 'Restaurants', 'Coffee & Snacks', 'Food Delivery', 'Transport', 'Fuel', 'Public Transit', 'Taxi & Rideshare',
+  'Parking & Tolls', 'Car Maintenance', 'Car Insurance', 'Rent', 'Mortgage', 'Utilities', 'Electricity', 'Water', 'Gas',
+  'Internet', 'Mobile Phone', 'Home Maintenance', 'Furniture & Appliances', 'Health', 'Pharmacy', 'Doctor & Dental',
+  'Health Insurance', 'Gym & Sports', 'Clothing', 'Shoes', 'Personal Care', 'Entertainment', 'Streaming & Subscriptions',
+  'Games', 'Books & Courses', 'Education', 'Travel', 'Hotels', 'Gifts', 'Donations', 'Pets', 'Kids', 'Taxes', 'Bank Fees',
+  'Loan Payments', 'Electronics', 'Hobbies', 'Tools & Equipment', 'Software', 'Other'
+];
+const DEFAULT_INCOME_CATS = [
+  'Salary', 'Bonus', 'Freelance', 'Business', 'Investments', 'Interest', 'Dividends', 'Rental Income', 'Refunds',
+  'Gifts Received', 'Sales', 'Tax Refund', 'Other'
+];
+
+/** Your own categories first (in order), then the example ones that are not already there. */
+function buildCategoryList(expense, income) {
+  const out = [];
+  [['expense', expense, DEFAULT_EXPENSE_CATS], ['income', income, DEFAULT_INCOME_CATS]].forEach(([kind, mine, defaults]) => {
+    const seen = new Set();
+    [...mine, ...defaults].forEach((name) => {
+      const k = name.toLowerCase();
+      if (seen.has(k)) return;
+      seen.add(k);
+      out.push({ name, kind, pos: seen.size - 1 });
+    });
+  });
+  return out;
+}
+/** Old single list of categories: "Salary" was the only income one. */
+const convertOldCategories = (names) => buildCategoryList(names.filter((n) => n !== 'Salary'), names.filter((n) => n === 'Salary'));
+
 /* ---------- IndexedDB ---------- */
 const DB_NAME = 'expenses-db';
-const DB_VERSION = 1;
-const STORES = ['transactions', 'categories', 'accounts', 'settings'];
+const DB_VERSION = 2;
+const STORES = ['transactions', 'cats', 'accounts', 'settings'];
 let db;
 
 function openDB() {
   return new Promise((resolve, reject) => {
     const r = indexedDB.open(DB_NAME, DB_VERSION);
-    r.onupgradeneeded = () => {
+    r.onupgradeneeded = (ev) => {
       const d = r.result;
+      const vt = r.transaction;
+      const old = ev.oldVersion;
       if (!d.objectStoreNames.contains('transactions')) {
         d.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true }).createIndex('date', 'date');
       }
-      if (!d.objectStoreNames.contains('categories')) d.createObjectStore('categories', { keyPath: 'name' });
       if (!d.objectStoreNames.contains('accounts')) d.createObjectStore('accounts', { keyPath: 'id', autoIncrement: true });
       if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
+      if (!d.objectStoreNames.contains('cats')) {
+        const cs = d.createObjectStore('cats', { keyPath: 'id', autoIncrement: true });
+        if (old >= 1 && d.objectStoreNames.contains('categories')) {
+          // Upgrade from the first versions: one list of names becomes separate expense / income lists.
+          const q = vt.objectStore('categories').getAll();
+          q.onsuccess = () => {
+            convertOldCategories(q.result.map((c) => c.name)).forEach((c) => cs.add(c));
+            d.deleteObjectStore('categories');
+          };
+        }
+      }
     };
     r.onsuccess = () => resolve(r.result);
     r.onerror = () => reject(r.error);
@@ -522,23 +635,23 @@ function write(storeNames, fn) {
 
 /* ---------- state ---------- */
 const PAGE = 50;
-const DEFAULT_CATEGORIES = ['Food', 'Transport', 'Housing', 'Utilities', 'Health', 'Entertainment', 'Shopping', 'Salary', 'Other'];
 const state = {
   tx: [], cats: [], accts: [], legs: new Map(),
-  defaultAcct: null,
-  filterAcct: null, limit: PAGE,
+  defaultAcct: null, limit: PAGE,
+  fltAccts: new Set(), fltCats: new Set(), fltTab: 'acct',
   type: 'expense',            // dialog mode: expense | income | transfer
   editing: null,              // null (new) | {kind:'tx', id} | {kind:'transfer', fromId, toId, tid}
-  statsMonth: null
+  statsOpen: new Set(),
+  reorder: { accts: false, expense: false, income: false }
 };
 
 async function seedIfNeeded() {
   const seeded = await reqP(db.transaction('settings').objectStore('settings').get('seeded'));
   if (seeded) return;
   await new Promise((resolve, reject) => {
-    const t = db.transaction(['categories', 'accounts', 'settings'], 'readwrite');
-    DEFAULT_CATEGORIES.forEach((name) => t.objectStore('categories').put({ name }));
-    const r = t.objectStore('accounts').add({ name: 'Cash', opening: 0, currency: 'USD' });
+    const t = db.transaction(['cats', 'accounts', 'settings'], 'readwrite');
+    buildCategoryList([], []).forEach((c) => t.objectStore('cats').add(c));
+    const r = t.objectStore('accounts').add({ name: 'Cash', opening: 0, currency: 'USD', pos: 0 });
     r.onsuccess = () => t.objectStore('settings').put({ key: 'defaultAcct', value: r.result });
     t.objectStore('settings').put({ key: 'seeded', value: true });
     t.oncomplete = resolve;
@@ -550,18 +663,21 @@ async function reload() {
   const [tx, cats, accts, settings] = await Promise.all(
     STORES.map((n) => reqP(db.transaction(n).objectStore(n).getAll()))
   );
-  // Upgrade data saved by the first version: accounts get a currency, "notes" becomes "description".
-  accts.forEach((a) => { if (!CURRENCIES.includes(a.currency)) a.currency = 'USD'; });
+  // Upgrade data saved by earlier versions.
+  accts.forEach((a) => {
+    if (!CURRENCIES.includes(a.currency)) a.currency = 'USD';
+    if (a.pos === undefined) a.pos = a.id;
+  });
   tx.forEach((t) => {
     if (t.description === undefined) t.description = t.notes ?? '';
     delete t.notes;
   });
   state.tx = tx.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.id - a.id));
-  state.cats = cats.sort((a, b) => a.name.localeCompare(b.name));
-  state.accts = accts.sort((a, b) => a.id - b.id);
+  state.cats = cats.sort((a, b) => (a.kind === b.kind ? (a.pos - b.pos) || a.name.localeCompare(b.name) : (a.kind < b.kind ? -1 : 1)));
+  state.accts = accts.sort((a, b) => (a.pos - b.pos) || (a.id - b.id));
   const s = Object.fromEntries(settings.map((x) => [x.key, x.value]));
   state.defaultAcct = state.accts.some((a) => a.id === s.defaultAcct) ? s.defaultAcct : (state.accts[0]?.id ?? null);
-  if (state.filterAcct != null && !state.accts.some((a) => a.id === state.filterAcct)) state.filterAcct = null;
+  [...state.fltAccts].forEach((id) => { if (!state.accts.some((a) => a.id === id)) state.fltAccts.delete(id); });
   state.legs = new Map();
   state.tx.forEach((t) => {
     if (t.transferId) {
@@ -578,6 +694,8 @@ const acct = (id) => state.accts.find((a) => a.id === id);
 const acctName = (id) => acct(id)?.name ?? 'Unknown account';
 const acctCur = (id) => acct(id)?.currency ?? 'USD';
 const txCur = (t) => acctCur(t.accountId);
+const catsOf = (kind) => state.cats.filter((c) => c.kind === kind);
+const isOpening = (t) => t.category === OPENING && !t.transferId;
 
 /** Description shown for an entry. Transfers show the other account's current name. */
 function descOf(t) {
@@ -587,15 +705,15 @@ function descOf(t) {
   }
   return t.description || '';
 }
-function titleOf(t) {
-  const cat = t.category || 'Uncategorized';
-  const d = descOf(t);
-  return d ? `${cat} - ${d}` : cat;
-}
 
 function nowLocal() {
   const d = new Date();
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
+function shiftMinutes(s, m) {
+  const d = new Date(s.slice(0, 16));
+  d.setMinutes(d.getMinutes() + m - d.getTimezoneOffset());
   return d.toISOString().slice(0, 16);
 }
 /** "Sun, Oct 25" (plus " - Today" / " - Yesterday") */
@@ -616,7 +734,7 @@ const monthLabel = (key) => {
 };
 const timeLabel = (s) => new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-/** Balance per account in cents: opening + income - expenses (transfers included). */
+/** Balance per account in cents (opening balances are entries like any other). */
 function balances() {
   const m = new Map(state.accts.map((a) => [a.id, cents(a.opening)]));
   for (const t of state.tx) {
@@ -626,24 +744,104 @@ function balances() {
   return m;
 }
 
-/* ---------- home view ---------- */
-function renderHome() {
-  $('#pills').replaceChildren(
-    el('button', { class: 'pill' + (state.filterAcct == null ? ' active' : ''), type: 'button', text: 'All',
-      onclick: () => { state.filterAcct = null; state.limit = PAGE; renderHome(); } }),
-    ...state.accts.map((a) => el('button', {
-      class: 'pill' + (state.filterAcct === a.id ? ' active' : ''), type: 'button', text: a.name,
-      onclick: () => { state.filterAcct = state.filterAcct === a.id ? null : a.id; state.limit = PAGE; renderHome(); }
-    }))
-  );
+/** Accounts created by older versions kept an opening balance on the account: turn it into an entry. */
+async function migrateOpening() {
+  const legacy = state.accts.filter((a) => a.opening);
+  if (!legacy.length) return;
+  await write(['transactions', 'accounts'], (s) => {
+    legacy.forEach((a) => {
+      const own = state.tx.filter((t) => t.accountId === a.id);
+      const date = own.length ? shiftMinutes(own[own.length - 1].date, -1) : nowLocal();
+      s.transactions.add({
+        type: a.opening > 0 ? 'income' : 'expense', amount: Math.abs(a.opening), date,
+        category: OPENING, accountId: a.id, description: ''
+      });
+      a.opening = 0;
+      s.accounts.put(a);
+    });
+  });
+  await reload();
+}
 
-  const items = state.filterAcct == null ? state.tx : state.tx.filter((t) => t.accountId === state.filterAcct);
+/* ---------- question dialog (replaces confirm for multi-step flows) ---------- */
+const dlgAsk = $('#dlgAsk');
+dlgAsk.addEventListener('click', (e) => { if (e.target === dlgAsk) dlgAsk.close(); });
+
+/** buttons: [{label, value, cls, keepOpen, action}]. Resolves with the clicked button's value (null if dismissed). */
+function ask({ title, body = [], buttons }) {
+  return new Promise((resolve) => {
+    $('#askTitle').textContent = title;
+    $('#askBody').replaceChildren(...body);
+    let done = false;
+    const onClose = () => { if (!dlgAsk.open) finish(null); };
+    const finish = (v) => {
+      if (done) return;
+      done = true;
+      dlgAsk.removeEventListener('close', onClose);
+      dlgAsk.close();
+      resolve(v);
+    };
+    dlgAsk.addEventListener('close', onClose);
+    $('#askBtns').replaceChildren(...buttons.map((b) => el('button', {
+      type: 'button', class: 'btn ' + (b.cls || ''), text: b.label,
+      onclick: async () => {
+        if (b.action) await b.action();
+        if (!b.keepOpen) finish(b.value);
+      }
+    })));
+    dlgAsk.showModal();
+    $('#askTitle').focus();
+  });
+}
+
+/* ---------- filters ---------- */
+function matches(t) {
+  if (state.fltAccts.size && !state.fltAccts.has(t.accountId)) return false;
+  if (state.fltCats.size) {
+    const cat = t.category || '';
+    if (!state.fltCats.has(`${t.type}:${cat}`) && !state.fltCats.has(`*:${cat}`)) return false;
+  }
+  return true;
+}
+const hasFilters = () => state.fltAccts.size > 0 || state.fltCats.size > 0;
+
+/* ---------- home view ---------- */
+function entryRow(t) {
+  const cur = txCur(t);
+  const d = descOf(t);
+  const inner = [
+    el('div', { class: 'row-main' },
+      el('div', { class: 'row-title' },
+        el('span', { class: 'cat-pill', text: t.category || 'Uncategorized' }),
+        d ? el('span', { class: 'row-desc', text: d }) : null),
+      el('div', { class: 'row-sub', text: `${timeLabel(t.date)}, ${acctName(t.accountId)}` })),
+    el('div', { class: 'row-amtbox' },
+      el('div', { class: 'row-amt ' + t.type, text: (t.type === 'income' ? '+' : '-') + fmtMoney(t.amount, cur) }),
+      el('div', { class: 'row-cur', text: cur }))
+  ];
+  if (isOpening(t)) return el('div', { class: 'row static' }, inner);   // opening balances cannot be edited
+  return el('button', { class: 'row', type: 'button', onclick: () => openDialog(t) }, inner);
+}
+
+function renderHome() {
+  const active = hasFilters();
+  $('#btnFilter').classList.toggle('active', active);
+  const note = $('#filterNote');
+  note.hidden = !active;
+  if (active) {
+    const parts = [];
+    if (state.fltAccts.size) parts.push(`${state.fltAccts.size} account${state.fltAccts.size > 1 ? 's' : ''}`);
+    if (state.fltCats.size) parts.push(`${state.fltCats.size} categor${state.fltCats.size > 1 ? 'ies' : 'y'}`);
+    note.textContent = 'Filters on: ' + parts.join(', ') + '.';
+  }
+
+  const items = state.tx.filter(matches);
   const shown = items.slice(0, state.limit);
   const list = $('#list');
   list.replaceChildren();
 
   if (!items.length) {
-    list.append(el('div', { class: 'empty', text: 'No entries yet. Tap Add entry to record your first one.' }));
+    list.append(el('div', { class: 'empty', text: active ? 'No entries match these filters.' : 'No entries yet. Tap Add entry to record your first one.' }));
     return;
   }
 
@@ -654,23 +852,45 @@ function renderHome() {
       currentDay = k;
       list.append(el('div', { class: 'day', text: dayLabel(k) }));
     }
-    const cur = txCur(t);
-    list.append(el('button', { class: 'row', type: 'button', onclick: () => openDialog(t) },
-      el('div', { class: 'row-main' },
-        el('div', { class: 'row-title', text: titleOf(t) }),
-        el('div', { class: 'row-sub', text: `${timeLabel(t.date)}, ${acctName(t.accountId)}` })
-      ),
-      el('div', { class: 'row-amtbox' },
-        el('div', { class: 'row-amt ' + t.type, text: (t.type === 'income' ? '+' : '-') + fmtMoney(t.amount, cur) }),
-        el('div', { class: 'row-cur', text: cur })
-      )
-    ));
+    list.append(entryRow(t));
   });
 
   if (items.length > shown.length) {
     list.append(el('button', { class: 'more', type: 'button', text: 'Show older entries', onclick: () => { state.limit += PAGE; renderHome(); } }));
   }
 }
+
+/* ---------- filter menu ---------- */
+const dlgFilter = $('#dlgFilter');
+dlgFilter.addEventListener('click', (e) => { if (e.target === dlgFilter) dlgFilter.close(); });
+
+function renderFilter() {
+  $('#fltTabAcct').classList.toggle('on', state.fltTab === 'acct');
+  $('#fltTabCat').classList.toggle('on', state.fltTab === 'cat');
+  const box = $('#fltList');
+  box.replaceChildren();
+  const toggle = (set, key) => { if (set.has(key)) set.delete(key); else set.add(key); state.limit = PAGE; renderFilter(); renderHome(); };
+  const opt = (label, sub, set, key) => {
+    const on = set.has(key);
+    return el('button', { class: 'opt' + (on ? ' on' : ''), type: 'button', onclick: () => toggle(set, key) },
+      el('span', { text: label }), sub ? el('span', { class: 'sub', text: sub }) : null, el('span', { class: 'chk', text: on ? '✓' : '' }));
+  };
+  if (state.fltTab === 'acct') {
+    state.accts.forEach((a) => box.append(opt(a.name, a.currency, state.fltAccts, a.id)));
+  } else {
+    box.append(el('div', { class: 'opt-head', text: 'Expense categories' }));
+    catsOf('expense').forEach((c) => box.append(opt(c.name, '', state.fltCats, 'expense:' + c.name)));
+    box.append(el('div', { class: 'opt-head', text: 'Income categories' }));
+    catsOf('income').forEach((c) => box.append(opt(c.name, '', state.fltCats, 'income:' + c.name)));
+    box.append(el('div', { class: 'opt-head', text: 'Other' }));
+    [TRANSFER, OPENING].forEach((n) => box.append(opt(n, '', state.fltCats, '*:' + n)));
+  }
+}
+$('#btnFilter').addEventListener('click', () => { renderFilter(); dlgFilter.showModal(); $('#fltTitle').focus(); });
+$('#fltTabAcct').addEventListener('click', () => { state.fltTab = 'acct'; renderFilter(); });
+$('#fltTabCat').addEventListener('click', () => { state.fltTab = 'cat'; renderFilter(); });
+$('#fltReset').addEventListener('click', () => { state.fltAccts.clear(); state.fltCats.clear(); renderFilter(); renderHome(); });
+$('#fltDone').addEventListener('click', () => dlgFilter.close());
 
 /* ---------- entry dialog ---------- */
 const dlg = $('#dlg');
@@ -706,6 +926,14 @@ function fillSelect(sel, options, selected) {
 }
 const acctOptions = () => state.accts.map((a) => ({ value: a.id, label: `${a.name} (${a.currency})` }));
 
+/** Category choices depend on the entry type (expense or income). */
+function fillCategorySelect(selected, allowOrphan) {
+  const list = catsOf(state.type);
+  const opts = [{ value: '', label: 'Choose a category' }, ...list.map((c) => ({ value: c.name, label: c.name }))];
+  if (allowOrphan && selected && !list.some((c) => c.name === selected)) opts.push({ value: selected, label: selected });
+  fillSelect($('#fCategory'), opts, selected);
+}
+
 function setType(type) {
   state.type = type;
   $('#segExpense').classList.toggle('on', type === 'expense');
@@ -715,13 +943,24 @@ function setType(type) {
   $('#normalAmount').hidden = tr;
   $('#normalFields').hidden = tr;
   $('#transferFields').hidden = !tr;
+  if (!tr) fillCategorySelect($('#fCategory').value, false);
 }
 
 function setupSeg(editing) {
   const seg = $('#seg');
-  seg.hidden = editing && editing.kind === 'transfer';
+  seg.hidden = !!(editing && editing.kind === 'transfer');
   $('#segTransfer').hidden = !!editing;
   seg.style.setProperty('--n', editing ? 2 : 3);
+}
+
+/** Opens the dialog without letting the browser focus the date field (which pops up the date picker). */
+function showEntryDialog(focusEl) {
+  const date = $('#fDate');
+  date.disabled = true;
+  dlg.showModal();
+  date.disabled = false;
+  (focusEl || $('#dlgTitle')).focus();
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
 }
 
 function openDialog(t) {
@@ -735,56 +974,40 @@ function openDialog(t) {
   $('#dlgTitle').textContent = t ? 'Edit entry' : 'New entry';
   setupSeg(state.editing);
   setType(t ? t.type : 'expense');
+  fillCategorySelect(t ? t.category : '', !!t);
   $('#fDate').value = t ? t.date : nowLocal();
   $('#fDesc').value = t ? (t.description || '') : '';
-
-  const catOpts = [{ value: '', label: 'Choose a category' }, ...state.cats.map((c) => ({ value: c.name, label: c.name }))];
-  if (t && t.category && !state.cats.some((c) => c.name === t.category)) catOpts.push({ value: t.category, label: t.category });
-  fillSelect($('#fCategory'), catOpts, t ? t.category : '');
   fillSelect($('#fAccount'), acctOptions(), t ? t.accountId : state.defaultAcct);
   entryAmt.set(t ? t.amount : null);
-
   $('#btnDelete').hidden = !t;
-  dlg.showModal();
-  if (!t) $('#fAmount').focus();
-  if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+  showEntryDialog(t ? null : $('#fAmount'));
 }
 
 function openTransferDialog(legs) {
   if (state.accts.length < 2) { alert('Transfers need at least two accounts. Add another one in Configuration.'); return; }
-  const editing = legs ? { kind: 'transfer', fromId: legs.from.id, toId: legs.to.id, tid: legs.from.transferId } : null;
-  state.editing = editing;
-  $('#dlgTitle').textContent = legs ? 'Edit transfer' : 'New entry';
-  setupSeg(editing);
+  state.editing = { kind: 'transfer', fromId: legs.from.id, toId: legs.to.id, tid: legs.from.transferId };
+  $('#dlgTitle').textContent = 'Edit transfer';
+  setupSeg(state.editing);
   setType('transfer');
-  $('#fDate').value = legs ? legs.from.date : nowLocal();
-  const fromAcct = legs ? legs.from.accountId : state.defaultAcct;
-  const toAcct = legs ? legs.to.accountId : (state.accts.find((a) => a.id !== fromAcct) || state.accts[0]).id;
-  fillSelect($('#tFrom'), acctOptions(), fromAcct);
-  fillSelect($('#tTo'), acctOptions(), toAcct);
-  fromAmt.set(legs ? legs.from.amount : null);
-  toAmt.set(legs ? legs.to.amount : null);
-  toEdited = !!legs;
-  $('#btnDelete').hidden = !legs;
-  dlg.showModal();
-  if (!legs) $('#tFromAmt').focus();
+  $('#fDate').value = legs.from.date;
+  fillSelect($('#tFrom'), acctOptions(), legs.from.accountId);
+  fillSelect($('#tTo'), acctOptions(), legs.to.accountId);
+  fromAmt.set(legs.from.amount);
+  toAmt.set(legs.to.amount);
+  toEdited = true;
+  $('#btnDelete').hidden = false;
+  showEntryDialog(null);
 }
 
-function openFromSegment() {
-  // Switching to Transfer while adding a new entry
+/** Switching to the Transfer tab while adding a new entry keeps the date and amount typed so far. */
+function switchToTransfer() {
   if (state.accts.length < 2) { alert('Transfers need at least two accounts. Add another one in Configuration.'); return; }
-  const date = $('#fDate').value;
   const amount = entryAmt.read();
-  openTransferDialogInPlace(date, amount);
-}
-function openTransferDialogInPlace(date, amount) {
-  $('#dlgTitle').textContent = 'New entry';
   setType('transfer');
   const fromAcct = Number($('#fAccount').value) || state.defaultAcct;
   const toAcct = (state.accts.find((a) => a.id !== fromAcct) || state.accts[0]).id;
   fillSelect($('#tFrom'), acctOptions(), fromAcct);
   fillSelect($('#tTo'), acctOptions(), toAcct);
-  $('#fDate').value = date || nowLocal();
   fromAmt.set(amount);
   toAmt.set(null);
   toEdited = false;
@@ -792,31 +1015,25 @@ function openTransferDialogInPlace(date, amount) {
   $('#tFromAmt').focus();
 }
 
-/** When both accounts share a currency and "To" was not typed by hand, "To" follows "From". */
-function mirrorTo() {
-  if (toEdited) return;
-  const same = fromAmt.cur === toAmt.cur;
-  $('#tToAmt').value = same ? $('#tFromAmt').value : '';
-}
-
-$('#btnAdd').addEventListener('click', () => openDialog(null));
-$('#segExpense').addEventListener('click', () => {
-  if (state.type === 'transfer') { backToNormal(); }
-  setType('expense');
-});
-$('#segIncome').addEventListener('click', () => {
-  if (state.type === 'transfer') { backToNormal(); }
-  setType('income');
-});
-$('#segTransfer').addEventListener('click', () => { if (state.type !== 'transfer') openFromSegment(); });
-
 /** Returning from the Transfer tab to Expense/Income while adding. */
-function backToNormal() {
+function switchFromTransfer(type) {
   $('#fAmount').value = $('#tFromAmt').value;
   entryAmt.cur = fromAmt.cur;
   fillSelect($('#fAccount'), acctOptions(), Number($('#tFrom').value));
   entryAmt.sync();
+  setType(type);
 }
+
+/** When both accounts share a currency and "To" was not typed by hand, "To" follows "From". */
+function mirrorTo() {
+  if (toEdited) return;
+  $('#tToAmt').value = fromAmt.cur === toAmt.cur ? $('#tFromAmt').value : '';
+}
+
+$('#btnAdd').addEventListener('click', () => openDialog(null));
+$('#segExpense').addEventListener('click', () => { if (state.type === 'transfer') switchFromTransfer('expense'); else setType('expense'); });
+$('#segIncome').addEventListener('click', () => { if (state.type === 'transfer') switchFromTransfer('income'); else setType('income'); });
+$('#segTransfer').addEventListener('click', () => { if (state.type !== 'transfer') switchToTransfer(); });
 
 $('#fAccount').addEventListener('change', () => entryAmt.sync());
 $('#tFrom').addEventListener('change', () => { fromAmt.sync(); toAmt.sync(); mirrorTo(); });
@@ -842,15 +1059,19 @@ $('#entryForm').addEventListener('submit', async (e) => {
     if (!(b > 0)) { $('#tToAmt').focus(); alert('Enter the amount that arrives in the "To" account.'); return; }
     const ed = state.editing && state.editing.kind === 'transfer' ? state.editing : null;
     const tid = ed ? ed.tid : 'tr' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    const legFrom = { type: 'expense', amount: a, date, category: 'Transfer', accountId: fromId, description: 'To ' + acctName(toId), transferId: tid };
-    const legTo = { type: 'income', amount: b, date, category: 'Transfer', accountId: toId, description: 'From ' + acctName(fromId), transferId: tid };
+    const legFrom = { type: 'expense', amount: a, date, category: TRANSFER, accountId: fromId, description: 'To ' + acctName(toId), transferId: tid };
+    const legTo = { type: 'income', amount: b, date, category: TRANSFER, accountId: toId, description: 'From ' + acctName(fromId), transferId: tid };
     if (ed) { legFrom.id = ed.fromId; legTo.id = ed.toId; }
     await write('transactions', (s) => { s.put(legFrom); return s.put(legTo); });
   } else {
     const amount = entryAmt.read();
     if (!(amount > 0)) { $('#fAmount').focus(); alert('Enter an amount greater than zero.'); return; }
     const category = $('#fCategory').value;
-    if (!category) { $('#fCategory').focus(); alert('Choose a category.'); return; }
+    if (!category) {
+      $('#fCategory').focus();
+      alert(catsOf(state.type).length ? 'Choose a category.' : `Add an ${state.type} category in Configuration first.`);
+      return;
+    }
     const rec = {
       type: state.type, amount, date, category,
       accountId: Number($('#fAccount').value),
@@ -885,92 +1106,126 @@ function showView(name) {
   $('#btnAdd').hidden = name !== 'home';
   window.scrollTo(0, 0);
   if (name === 'home') renderHome();
-  else if (name === 'stats') { state.statsMonth = null; renderStats(); }
+  else if (name === 'stats') renderStats();
   else renderSettings();
 }
 $('#btnSettings').addEventListener('click', () => showView('settings'));
 $('#btnStats').addEventListener('click', () => showView('stats'));
 $('#btnBack').addEventListener('click', () => showView('home'));
-$('#btnStatsBack').addEventListener('click', () => {
-  if (state.statsMonth) { state.statsMonth = null; renderStats(); window.scrollTo(0, 0); }
-  else showView('home');
-});
+$('#btnStatsBack').addEventListener('click', () => showView('home'));
 
 /* ---------- stats view ---------- */
-/** Income and expense totals (in cents, per currency) grouped by month (len 7) or day (len 10).
- *  Transfers are left out: they only move money between accounts. */
-function aggregate(len, monthPrefix) {
+/** Per month and currency: income, expenses and a total per category (in cents).
+ *  Transfers and opening balances are left out: they are not income or spending. */
+function monthAggregates() {
   const map = new Map();
   for (const t of state.tx) {
-    if (t.transferId) continue;
-    const k = t.date.slice(0, len);
-    if (monthPrefix && !k.startsWith(monthPrefix)) continue;
+    if (t.transferId || isOpening(t)) continue;
+    const k = t.date.slice(0, 7);
     const cur = txCur(t);
-    const e = map.get(k) || {};
-    const c = e[cur] || (e[cur] = { inc: 0, exp: 0 });
-    if (t.type === 'income') c.inc += cents(t.amount); else c.exp += cents(t.amount);
-    map.set(k, e);
+    const m = map.get(k) || {};
+    const c = m[cur] || (m[cur] = { inc: 0, exp: 0, cats: new Map() });
+    const v = cents(t.amount);
+    if (t.type === 'income') c.inc += v; else c.exp += v;
+    const key = t.type + '|' + (t.category || 'Uncategorized');
+    c.cats.set(key, (c.cats.get(key) || 0) + v);
+    map.set(k, m);
   }
   return [...map.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
 }
 
-function periodBlock(title, data, onclick) {
-  const rows = CURRENCIES.filter((c) => data[c]).map((c) => el('div', { class: 'prow' },
-    el('span', { class: 'pcode', text: c }),
-    el('span', { class: 'pinc', text: data[c].inc ? '+' + fmtMoney(data[c].inc / 100, c) : '–' }),
-    el('span', { class: 'pexp', text: data[c].exp ? '-' + fmtMoney(data[c].exp / 100, c) : '–' })
-  ));
-  const props = { class: 'pblock' + (onclick ? ' tappable' : '') };
-  if (onclick) { props.type = 'button'; props.onclick = onclick; }
-  return el(onclick ? 'button' : 'div', props, el('div', { class: 'ptitle', text: title }), rows);
+const srow = (label, cls, text) => el('div', { class: 'srow ' + cls }, el('span', { text: label }), el('span', { text }));
+
+function monthBlock(k, data) {
+  const open = state.statsOpen.has(k);
+  const kids = [el('div', { class: 'mtitle', text: monthLabel(k) })];
+  CURRENCIES.filter((c) => data[c]).forEach((c) => {
+    const d = data[c];
+    const net = d.inc - d.exp;
+    kids.push(el('div', { class: 'mcode', text: c }));
+    kids.push(srow('Income', 'inc', d.inc ? '+' + fmtMoney(d.inc / 100, c) : fmtMoney(0, c)));
+    kids.push(srow('Expenses', 'exp', d.exp ? '-' + fmtMoney(d.exp / 100, c) : fmtMoney(0, c)));
+    kids.push(srow('Total', 'tot', (net > 0 ? '+' : '') + fmtMoney(net / 100, c)));
+    if (open) {
+      const rows = [...d.cats.entries()].map(([key, v]) => {
+        const i = key.indexOf('|');
+        return { kind: key.slice(0, i), name: key.slice(i + 1), v };
+      }).sort((a, b) => (a.kind === b.kind ? b.v - a.v : (a.kind === 'income' ? -1 : 1)));
+      kids.push(el('div', { class: 'tree' },
+        el('div', { class: 'tree-title', text: 'By category' }),
+        ...rows.map((r) => el('div', { class: 'trow ' + r.kind },
+          el('span', { class: 'tn', text: r.name }),
+          el('span', { class: 'ta', text: (r.kind === 'income' ? '+' : '-') + fmtMoney(r.v / 100, c) })))));
+    }
+  });
+  return el('button', {
+    class: 'mblock' + (open ? ' open' : ''), type: 'button',
+    onclick: () => { if (state.statsOpen.has(k)) state.statsOpen.delete(k); else state.statsOpen.add(k); renderStats(); }
+  }, kids);
 }
 
-function balLine(name, cur, cents_, extra = '') {
+function balLine(name, cur, c, extra = '') {
   return el('div', { class: 'bal-line ' + extra },
     el('span', { class: 'nm', text: name }),
-    el('span', { class: 'amt' + (cents_ < 0 ? ' neg' : ''), text: fmtMoney(cents_ / 100, cur) }, el('span', { class: 'code', text: cur }))
+    el('span', { class: 'amt' + (c < 0 ? ' neg' : ''), text: fmtMoney(c / 100, cur) }, el('span', { class: 'code', text: cur }))
   );
 }
 
 function renderStats() {
   const body = $('#statsBody');
   body.replaceChildren();
-  const month = state.statsMonth;
-  $('#statsTitle').textContent = month ? monthLabel(month) : 'Stats';
+  const bal = balances();
+  const totals = {};
+  state.accts.forEach((a) => { totals[a.currency] = (totals[a.currency] || 0) + (bal.get(a.id) || 0); });
 
-  if (!month) {
-    const bal = balances();
-    const totals = {};
-    state.accts.forEach((a) => { totals[a.currency] = (totals[a.currency] || 0) + (bal.get(a.id) || 0); });
+  body.append(el('section', { class: 'sec' }, el('h2', { text: 'Total balance' }),
+    ...CURRENCIES.filter((c) => totals[c] !== undefined).map((c) => balLine(c === 'USD' ? 'US dollars' : 'Chilean pesos', c, totals[c], 'bal-total'))));
 
-    body.append(el('section', { class: 'sec' }, el('h2', { text: 'Total balance' }),
-      ...CURRENCIES.filter((c) => totals[c] !== undefined).map((c) => balLine(c === 'USD' ? 'US dollars' : 'Chilean pesos', c, totals[c], 'bal-total'))));
+  body.append(el('section', { class: 'sec' }, el('h2', { text: 'Accounts' }),
+    ...state.accts.map((a) => balLine(a.name, a.currency, bal.get(a.id) || 0))));
 
-    body.append(el('section', { class: 'sec' }, el('h2', { text: 'Accounts' }),
-      ...state.accts.map((a) => balLine(a.name, a.currency, bal.get(a.id) || 0))));
-
-    const months = aggregate(7);
-    const sec = el('section', { class: 'sec' }, el('h2', { text: 'By month' }));
-    if (!months.length) {
-      sec.append(el('div', { class: 'empty', text: 'Income and expenses will show up here by month.' }));
-    } else {
-      sec.append(el('div', { class: 'pcols' }, el('span'), el('span', { text: 'Income' }), el('span', { text: 'Expenses' })));
-      months.forEach(([k, data]) => sec.append(periodBlock(monthLabel(k), data, () => { state.statsMonth = k; renderStats(); window.scrollTo(0, 0); })));
-      sec.append(el('p', { class: 'footnote', text: 'Transfers between your accounts are not counted as income or expenses.' }));
-    }
-    body.append(sec);
+  const months = monthAggregates();
+  const sec = el('section', { class: 'sec' }, el('h2', { text: 'By month' }));
+  if (!months.length) {
+    sec.append(el('div', { class: 'empty', text: 'Income and expenses will show up here by month.' }));
   } else {
-    const days = aggregate(10, month);
-    const sec = el('section', { class: 'sec' });
-    sec.append(el('div', { class: 'pcols' }, el('span'), el('span', { text: 'Income' }), el('span', { text: 'Expenses' })));
-    days.forEach(([k, data]) => sec.append(periodBlock(dayLabel(k), data)));
-    body.append(sec);
+    months.forEach(([k, data]) => sec.append(monthBlock(k, data)));
+    sec.append(el('p', { class: 'footnote', text: 'Tap a month to see it by category. Transfers between your accounts and opening balances are not counted as income or expenses.' }));
   }
+  body.append(sec);
 }
 
 /* ---------- settings view ---------- */
-function renderSettings() {
-  $('#acctList').replaceChildren(...state.accts.map((a) => {
+async function moveItem(store, list, i, delta) {
+  const j = i + delta;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  list.forEach((x, k) => { x.pos = k; });
+  await write(store, (s) => { list.forEach((x) => s.put(x)); });
+  await reload();
+  renderSettings();
+}
+const arrowBtn = (dir, disabled, onclick) => {
+  const b = el('button', { class: 'sq', type: 'button', 'aria-label': dir > 0 ? 'Move down' : 'Move up', text: dir > 0 ? '▼' : '▲', onclick });
+  b.disabled = disabled;
+  return b;
+};
+
+function renderAccounts() {
+  const reorder = state.reorder.accts;
+  $('#reorderAccts').textContent = reorder ? 'Done' : 'Reorder';
+  const list = $('#acctList');
+  list.replaceChildren(el('div', { class: 'line head' },
+    el('span', { text: 'Account' }), el('span', { text: 'Currency' }), el('span', { text: reorder ? 'Move' : 'Default' }), el('span')));
+
+  state.accts.forEach((a, i) => {
+    if (reorder) {
+      list.append(el('div', { class: 'line' },
+        el('span', { class: 'nm', text: a.name }), el('span', { class: 'cur', text: a.currency }),
+        arrowBtn(-1, i === 0, () => moveItem('accounts', state.accts, i, -1)),
+        arrowBtn(1, i === state.accts.length - 1, () => moveItem('accounts', state.accts, i, 1))));
+      return;
+    }
     const nameIn = el('input', { type: 'text', 'aria-label': 'Account name', autocomplete: 'off' });
     nameIn.value = a.name;
     nameIn.addEventListener('change', async () => {
@@ -980,104 +1235,180 @@ function renderSettings() {
       await write('accounts', (s) => s.put(a));
     });
 
-    const curSel = el('select', { 'aria-label': 'Currency' });
-    fillSelect(curSel, CURRENCIES.map((c) => ({ value: c, label: c })), a.currency);
-
-    const openIn = el('input', { type: 'text', inputmode: 'decimal', 'aria-label': 'Opening balance', autocomplete: 'off' });
-    const showOpen = () => { openIn.value = fmtPlain(a.opening || 0, a.currency); };
-    showOpen();
-    openIn.addEventListener('change', async () => {
-      const neg = /^\s*-/.test(openIn.value);
-      const v = parseAmount(openIn.value, a.currency);
-      a.opening = v == null ? 0 : (neg ? -v : v);
-      showOpen();
-      await write('accounts', (s) => s.put(a));
-    });
-
-    curSel.addEventListener('change', async () => {
-      if (state.tx.some((t) => t.accountId === a.id)) {
-        alert(`"${a.name}" already has entries, so its currency cannot be changed.`);
-        curSel.value = a.currency;
-        return;
-      }
-      a.currency = curSel.value;
-      a.opening = parseAmount(String(a.opening || 0), a.currency) || 0;
-      showOpen();
-      await write('accounts', (s) => s.put(a));
-    });
-
-    const radio = el('input', { type: 'radio', name: 'defAcct', 'aria-label': 'Default account' });
+    const radio = el('input', { type: 'radio', name: 'defAcct', 'aria-label': `Make ${a.name} the default account` });
     radio.checked = a.id === state.defaultAcct;
     radio.addEventListener('change', async () => {
       state.defaultAcct = a.id;
       await setSetting('defaultAcct', a.id);
     });
 
-    const delBtn = el('button', { class: 'mini', type: 'button', 'aria-label': 'Delete account', text: '×' });
+    const delBtn = el('button', { class: 'sq del', type: 'button', 'aria-label': `Delete ${a.name}`, text: '×' });
     delBtn.addEventListener('click', async () => {
       if (state.accts.length === 1) { alert('You need at least one account.'); return; }
-      if (state.tx.some((t) => t.accountId === a.id)) {
+      const own = state.tx.filter((t) => t.accountId === a.id);
+      if (own.some((t) => !isOpening(t))) {
         alert(`"${a.name}" has entries and cannot be deleted. Delete or edit those entries first.`);
         return;
       }
       if (!confirm(`Delete the account "${a.name}"?`)) return;
-      await write('accounts', (s) => s.delete(a.id));
+      await write(['accounts', 'transactions'], (s) => {
+        own.forEach((t) => s.transactions.delete(t.id));
+        return s.accounts.delete(a.id);
+      });
       await reload();
       await setSetting('defaultAcct', state.defaultAcct);
       renderSettings();
     });
 
-    return el('div', { class: 'acct-card' }, nameIn,
-      el('div', { class: 'acct-meta' }, curSel,
-        el('label', { class: 'open' }, el('span', { text: 'Opening balance' }), openIn),
-        el('label', { class: 'def' }, radio, 'Default'),
-        delBtn));
+    list.append(el('div', { class: 'line' }, nameIn, el('span', { class: 'cur', text: a.currency }), el('label', { class: 'rad' }, radio), delBtn));
+  });
+}
+
+function renderCats(kind) {
+  const box = $(kind === 'expense' ? '#catExpense' : '#catIncome');
+  const reorder = state.reorder[kind];
+  $(kind === 'expense' ? '#reorderExpense' : '#reorderIncome').textContent = reorder ? 'Done' : 'Reorder';
+  const list = catsOf(kind);
+  box.replaceChildren(...list.map((c, i) => {
+    if (reorder) {
+      return el('div', { class: 'line cat' }, el('span', { class: 'nm', text: c.name }),
+        arrowBtn(-1, i === 0, () => moveItem('cats', catsOf(kind), i, -1)),
+        arrowBtn(1, i === list.length - 1, () => moveItem('cats', catsOf(kind), i, 1)));
+    }
+    return el('div', { class: 'line cat' }, el('span', { class: 'nm', text: c.name }), el('span'),
+      el('button', { class: 'sq del', type: 'button', 'aria-label': `Delete ${c.name}`, text: '×', onclick: () => deleteCategory(c) }));
   }));
+  if (!list.length) box.append(para('No categories yet.', 'hint'));
+}
 
-  fillSelect($('#newAcctCur'), CURRENCIES.map((c) => ({ value: c, label: c })), 'USD');
-
-  $('#catList').replaceChildren(...state.cats.map((c) => {
-    const x = el('button', { type: 'button', 'aria-label': `Remove ${c.name}`, text: '×' });
-    x.addEventListener('click', async () => {
-      if (!confirm(`Remove the category "${c.name}"?`)) return;
-      await write('categories', (s) => s.delete(c.name));
-      await reload();
-      renderSettings();
-    });
-    return el('span', { class: 'chip' }, el('span', { text: c.name }), x);
-  }));
-
+function renderSettings() {
+  renderAccounts();
+  renderCats('expense');
+  renderCats('income');
+  fillSelect($('#newAcctCur'), CURRENCIES.map((c) => ({ value: c, label: c })), $('#newAcctCur').value || 'USD');
   if (navigator.storage && navigator.storage.persisted) {
     navigator.storage.persisted().then((p) => {
-      $('#persistNote').textContent = p
+      $('#persistNote').textContent = (p
         ? 'Everything is stored on this device only. The browser has marked it as protected storage. Still back up regularly.'
-        : 'Everything is stored on this device only. Back up regularly, especially before clearing Safari data or deleting the app.';
+        : 'Everything is stored on this device only. Back up regularly, especially before clearing Safari data or deleting the app.')
+        + ' Backups include your accounts and category lists.';
     });
   }
 }
+
+$('#reorderAccts').addEventListener('click', () => { state.reorder.accts = !state.reorder.accts; renderSettings(); });
+$('#reorderExpense').addEventListener('click', () => { state.reorder.expense = !state.reorder.expense; renderSettings(); });
+$('#reorderIncome').addEventListener('click', () => { state.reorder.income = !state.reorder.income; renderSettings(); });
+
+/* new account (with opening balance) */
+let openCur = 'USD';
+const newOpen = $('#newAcctOpen');
+const parseOpening = (raw, cur) => {
+  const v = parseAmount(raw, cur);
+  return v == null ? null : (/^\s*-/.test(raw) ? -v : v);
+};
+newOpen.addEventListener('blur', () => {
+  const v = parseOpening(newOpen.value, openCur);
+  if (v != null) newOpen.value = fmtPlain(v, openCur);
+});
+$('#newAcctCur').addEventListener('change', () => {
+  const v = parseOpening(newOpen.value, openCur);
+  openCur = $('#newAcctCur').value;
+  newOpen.value = v == null ? '' : fmtPlain(v, openCur);
+  newOpen.placeholder = openCur === 'CLP' ? 'Opening balance (0)' : 'Opening balance (0.00)';
+  newOpen.inputMode = openCur === 'CLP' ? 'numeric' : 'decimal';
+});
 
 $('#addAcctForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = $('#newAcctName').value.trim();
   if (!name) { $('#newAcctName').focus(); return; }
   if (state.accts.some((a) => a.name.toLowerCase() === name.toLowerCase())) { alert('An account with that name already exists.'); return; }
-  await write('accounts', (s) => s.add({ name, opening: 0, currency: $('#newAcctCur').value }));
+  const currency = $('#newAcctCur').value;
+  const opening = parseOpening(newOpen.value, currency);
+  const pos = state.accts.reduce((m, a) => Math.max(m, a.pos), -1) + 1;
+  await write(['accounts', 'transactions'], (s) => {
+    const r = s.accounts.add({ name, opening: 0, currency, pos });
+    r.onsuccess = () => {
+      if (opening) {
+        s.transactions.add({
+          type: opening > 0 ? 'income' : 'expense', amount: Math.abs(opening), date: nowLocal(),
+          category: OPENING, accountId: r.result, description: ''
+        });
+      }
+    };
+  });
   $('#newAcctName').value = '';
+  newOpen.value = '';
   await reload();
   renderSettings();
 });
 
-$('#addCatForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = $('#newCatName').value.trim();
-  if (!name) { $('#newCatName').focus(); return; }
-  if (name.toLowerCase() === 'transfer') { alert('"Transfer" is reserved for transfers between accounts.'); return; }
-  if (state.cats.some((c) => c.name.toLowerCase() === name.toLowerCase())) { alert('That category already exists.'); return; }
-  await write('categories', (s) => s.put({ name }));
-  $('#newCatName').value = '';
+/* categories */
+async function addCategory(kind, input) {
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  if ([TRANSFER, OPENING].some((r) => r.toLowerCase() === name.toLowerCase())) { alert(`"${name}" is reserved by the app.`); return; }
+  if (catsOf(kind).some((c) => c.name.toLowerCase() === name.toLowerCase())) { alert('That category already exists.'); return; }
+  const pos = catsOf(kind).reduce((m, c) => Math.max(m, c.pos), -1) + 1;
+  await write('cats', (s) => s.add({ name, kind, pos }));
+  input.value = '';
   await reload();
   renderSettings();
-});
+}
+$('#addCatExpense').addEventListener('submit', (e) => { e.preventDefault(); addCategory('expense', $('#newCatExpense')); });
+$('#addCatIncome').addEventListener('submit', (e) => { e.preventDefault(); addCategory('income', $('#newCatIncome')); });
+
+async function deleteCategory(c) {
+  const ok = await ask({
+    title: `Delete "${c.name}"?`,
+    body: [
+      para(`This removes "${c.name}" from your ${c.kind} categories.`),
+      para('Warning: make a backup before deleting categories, in case you want to go back.', 'warn')
+    ],
+    buttons: [
+      { label: 'Save a backup now', keepOpen: true, action: doBackup },
+      { label: 'Delete category', value: true, cls: 'danger' },
+      { label: 'Cancel', value: false }
+    ]
+  });
+  if (!ok) return;
+
+  const used = state.tx.filter((t) => !t.transferId && t.type === c.kind && t.category === c.name);
+  let target = null;
+  if (used.length) {
+    const choice = await ask({
+      title: 'Entries use this category',
+      body: [para(`${used.length} ${c.kind} ${used.length === 1 ? 'entry uses' : 'entries use'} "${c.name}". What should happen to ${used.length === 1 ? 'it' : 'them'}?`)],
+      buttons: [
+        { label: 'Reassign to another category', value: 'reassign' },
+        { label: 'Leave as they are', value: 'leave' },
+        { label: 'Cancel', value: null }
+      ]
+    });
+    if (!choice) return;
+    if (choice === 'reassign') {
+      const others = catsOf(c.kind).filter((x) => x.id !== c.id);
+      if (!others.length) { alert(`There is no other ${c.kind} category to move them to. Add one first.`); return; }
+      const sel = el('select', { 'aria-label': 'New category' });
+      fillSelect(sel, others.map((x) => ({ value: x.name, label: x.name })), others[0].name);
+      const go = await ask({
+        title: 'Move entries to which category?',
+        body: [sel],
+        buttons: [{ label: 'Reassign and delete', value: true, cls: 'primary' }, { label: 'Cancel', value: false }]
+      });
+      if (!go) return;
+      target = sel.value;
+    }
+  }
+  await write(['transactions', 'cats'], (s) => {
+    if (target) used.forEach((t) => s.transactions.put({ ...t, category: target }));
+    return s.cats.delete(c.id);
+  });
+  await reload();
+  renderSettings();
+  renderHome();
+}
 
 /* ---------- export / backup / restore ---------- */
 async function saveFile(name, data, mime) {
@@ -1109,23 +1440,65 @@ function exportRows() {
   }));
 }
 
-$('#btnCsv').addEventListener('click', () => {
+/** Asks which entries to export. Resolves {prefix, name} or null. */
+async function pickExportRange() {
+  const scope = await ask({
+    title: 'Export which entries?',
+    buttons: [
+      { label: 'One month', value: 'month' }, { label: 'One year', value: 'year' },
+      { label: 'All records', value: 'all' }, { label: 'Cancel', value: null }
+    ]
+  });
+  if (!scope) return null;
+  if (scope === 'all') return { prefix: '', name: `expenses-all-${stamp()}` };
+
+  const thisYear = new Date().getFullYear();
+  const years = [...new Set([...state.tx.map((t) => Number(t.date.slice(0, 4))), thisYear])].sort((a, b) => b - a);
+  const yearSel = el('select', { 'aria-label': 'Year' });
+  fillSelect(yearSel, years.map((y) => ({ value: y, label: String(y) })), thisYear);
+  const body = [el('label', { class: 'field' }, el('span', { text: 'Year' }), yearSel)];
+  let monthSel = null;
+  if (scope === 'month') {
+    monthSel = el('select', { 'aria-label': 'Month' });
+    fillSelect(monthSel, Array.from({ length: 12 }, (_, i) => ({
+      value: String(i + 1).padStart(2, '0'),
+      label: new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' })
+    })), String(new Date().getMonth() + 1).padStart(2, '0'));
+    body.push(el('label', { class: 'field' }, el('span', { text: 'Month' }), monthSel));
+  }
+  const ok = await ask({
+    title: scope === 'month' ? 'Which month?' : 'Which year?', body,
+    buttons: [{ label: 'Export', value: true, cls: 'primary' }, { label: 'Cancel', value: false }]
+  });
+  if (!ok) return null;
+  const prefix = scope === 'month' ? `${yearSel.value}-${monthSel.value}` : yearSel.value;
+  return { prefix, name: `expenses-${prefix}` };
+}
+
+async function exportEntries(format) {
+  const range = await pickExportRange();
+  if (!range) return;
+  const rows = exportRows().filter((r) => r.date.startsWith(range.prefix));
+  if (!rows.length) { alert('There are no entries in that period.'); return; }
+  if (format === 'xlsx') {
+    await saveFile(`${range.name}.xlsx`, buildXlsx(rows), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    return;
+  }
   const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Date', 'Type', 'Amount', 'Currency', 'Category', 'Account', 'Description']];
-  exportRows().forEach((r) => rows.push([r.date.replace('T', ' '), r.type, r.currency === 'CLP' ? r.amount.toFixed(0) : r.amount.toFixed(2), r.currency, r.category, r.account, r.description]));
-  const csv = '\uFEFF' + rows.map((r) => r.map(q).join(',')).join('\r\n');
-  saveFile(`expenses-${stamp()}.csv`, csv, 'text/csv');
-});
+  const out = [['Date', 'Type', 'Amount', 'Currency', 'Category', 'Account', 'Description']];
+  rows.forEach((r) => out.push([r.date.replace('T', ' '), r.type, r.currency === 'CLP' ? r.amount.toFixed(0) : r.amount.toFixed(2), r.currency, r.category, r.account, r.description]));
+  const csv = '\uFEFF' + out.map((r) => r.map(q).join(',')).join('\r\n');
+  await saveFile(`${range.name}.csv`, csv, 'text/csv');
+}
+$('#btnCsv').addEventListener('click', () => exportEntries('csv'));
+$('#btnXlsx').addEventListener('click', () => exportEntries('xlsx'));
 
-$('#btnXlsx').addEventListener('click', () => {
-  saveFile(`expenses-${stamp()}.xlsx`, buildXlsx(exportRows()), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-});
-
-$('#btnBackup').addEventListener('click', async () => {
-  const data = { app: 'expense-tracker', version: 2, exported: new Date().toISOString() };
+async function doBackup() {
+  const data = { app: 'expense-tracker', version: 3, exported: new Date().toISOString() };
   for (const n of STORES) data[n] = await reqP(db.transaction(n).objectStore(n).getAll());
-  saveFile(`expenses-backup-${stamp()}.json`, JSON.stringify(data, null, 2), 'application/json');
-});
+  await saveFile(`expenses-backup-${stamp()}.json`, JSON.stringify(data, null, 2), 'application/json');
+}
+$('#btnBackup').addEventListener('click', doBackup);
 
 $('#btnRestore').addEventListener('click', () => $('#fileRestore').click());
 $('#fileRestore').addEventListener('change', async (e) => {
@@ -1134,7 +1507,10 @@ $('#fileRestore').addEventListener('change', async (e) => {
   if (!f) return;
   let data;
   try { data = JSON.parse(await f.text()); } catch { alert('That file is not a valid backup.'); return; }
-  if (data.app !== 'expense-tracker' || !Array.isArray(data.transactions) || !Array.isArray(data.accounts) || !Array.isArray(data.categories)) {
+  // Backups from earlier versions have one list of category names.
+  const cats = Array.isArray(data.cats) ? data.cats
+    : (Array.isArray(data.categories) ? convertOldCategories(data.categories.map((c) => c.name)) : null);
+  if (data.app !== 'expense-tracker' || !Array.isArray(data.transactions) || !Array.isArray(data.accounts) || !cats) {
     alert('That file is not an expense tracker backup.');
     return;
   }
@@ -1142,12 +1518,13 @@ $('#fileRestore').addEventListener('change', async (e) => {
   await write(STORES, (s) => {
     STORES.forEach((n) => s[n].clear());
     data.transactions.forEach((x) => s.transactions.put(x));
-    data.categories.forEach((x) => s.categories.put(x));
+    cats.forEach((x) => s.cats.put(x));
     data.accounts.forEach((x) => s.accounts.put(x));
     (data.settings || []).forEach((x) => s.settings.put(x));
     s.settings.put({ key: 'seeded', value: true });
   });
   await reload();
+  await migrateOpening();
   renderSettings();
   alert('Backup restored.');
 });
@@ -1158,6 +1535,7 @@ $('#fileRestore').addEventListener('change', async (e) => {
     db = await openDB();
     await seedIfNeeded();
     await reload();
+    await migrateOpening();
     renderHome();
   } catch (err) {
     $('#list').append(el('div', { class: 'empty', text: 'Storage is not available in this browser mode. Try opening the app outside private browsing.' }));
