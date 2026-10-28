@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2f4bd0">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f8f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1f2b" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Expenses">
@@ -13,17 +15,18 @@
 <title>Expenses</title>
 <style>
 :root {
-  --paper: #f3f4f1;
+  --paper: #f8f9f6;
   --card: #ffffff;
   --ink: #1c2433;
   --muted: #667085;
   --rule: #dfe2dc;
+  --edge: #aab1a4;
   --accent: #2f4bd0;
   --accent-ink: #ffffff;
   --income: #1b7f4f;
   --expense: #b3261e;
-  --pill: #e4e8fb;
-  --pill-ink: #27389f;
+  --pill: #3f4fc0;
+  --pill-ink: #ffffff;
   --warn-bg: #fff4e0;
   --warn-ink: #7a4b00;
   --shadow: 0 6px 18px rgba(28, 36, 51, .22);
@@ -31,17 +34,18 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #12161f;
-    --card: #1b2130;
-    --ink: #e7eaf1;
-    --muted: #9aa3b5;
-    --rule: #2a3245;
+    --paper: #1b212d;
+    --card: #252d3e;
+    --ink: #eef1f7;
+    --muted: #a6aebf;
+    --rule: #364058;
+    --edge: #55627f;
     --accent: #7d92ff;
     --accent-ink: #0d1020;
     --income: #4cc38a;
     --expense: #ff7b72;
-    --pill: #2a3358;
-    --pill-ink: #b9c4ff;
+    --pill: #4a5bd0;
+    --pill-ink: #ffffff;
     --warn-bg: #3a2e12;
     --warn-ink: #ffd58a;
     --shadow: 0 6px 18px rgba(0, 0, 0, .5);
@@ -49,7 +53,7 @@
   }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html { height: 100%; }
+html { height: 100%; background: var(--paper); }
 body {
   margin: 0; min-height: 100%;
   background: var(--paper); color: var(--ink);
@@ -62,7 +66,7 @@ button { font: inherit; color: inherit; }
 
 /* header */
 .top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 6px; }
-.top h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+.top h1 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
 .hdr-btns { display: flex; gap: 2px; }
 .icon-btn {
   position: relative; width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent;
@@ -76,7 +80,7 @@ button { font: inherit; color: inherit; }
 
 /* ledger */
 #list > .day:first-child { margin-top: 14px; }
-.day { margin-top: 34px; padding-bottom: 6px; border-bottom: 4px double var(--ink); font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.day { margin-top: 34px; padding-bottom: 6px; border-bottom: 1.5px solid var(--ink); font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
 .row {
   display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px;
   text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule);
@@ -89,9 +93,9 @@ button { font: inherit; color: inherit; }
 .row-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .cat-pill {
   flex: 0 1 auto; max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  background: var(--pill); color: var(--pill-ink); border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 650;
+  background: var(--pill); color: var(--pill-ink); border-radius: 999px; padding: 2px 11px; font-size: 14.5px; font-weight: 650;
 }
-.row-desc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-desc { font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-sub { color: var(--muted); font-size: 13px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-amtbox { text-align: right; flex: 0 0 auto; }
 .row-amt { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -131,10 +135,12 @@ dialog::backdrop { background: rgba(10, 14, 24, .5); }
 .field > span, .grp-title { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 input[type=text], input[type=datetime-local], select {
   width: 100%; font: inherit; font-size: 16px; color: var(--ink); background: var(--paper);
-  border: 1.5px solid transparent; border-radius: 10px; padding: 11px 12px; min-height: 46px; appearance: none; -webkit-appearance: none;
+  border: 1.5px solid var(--edge); border-radius: 10px; padding: 11px 12px; min-height: 46px; appearance: none; -webkit-appearance: none;
 }
+.sec input[type=text], .sec select { background-color: var(--card); }
 select { background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 30px; }
-input:focus, select:focus { outline: none; border-color: var(--accent); }
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+::placeholder { color: var(--muted); opacity: .85; }
 .money { position: relative; }
 .money input { padding-right: 50px; text-align: right; }
 .money .tag { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); pointer-events: none; }
@@ -164,7 +170,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 /* settings */
 .sec { margin-top: 24px; }
 .sec-head { display: flex; align-items: center; justify-content: space-between; }
-.sec h2 { font-size: 17px; margin: 0 0 4px; }
+.sec h2 { font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -.01em; }
 .sec p.hint { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
 .link { background: transparent; border: 0; color: var(--accent); font-weight: 600; padding: 8px 4px; cursor: pointer; }
 .line { display: grid; grid-template-columns: 1fr 52px 44px 44px; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--rule); min-height: 52px; }
@@ -191,9 +197,10 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .bal-line { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); }
 .bal-line .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bal-line .amt { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
-.bal-line .amt.neg { color: var(--expense); }
+.pos { color: var(--income); }
+.neg { color: var(--expense); }
 .bal-line .code { display: block; font-size: 11px; font-weight: 400; color: var(--muted); line-height: 1.2; }
-.bal-total .amt { font-size: 22px; }
+.mblock .mtitle { margin-top: 0; }
 .mblock { display: block; width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 14px 2px; cursor: pointer; }
 .mblock:active { background: var(--rule); }
 .mtitle { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 17px; margin-bottom: 4px; }
@@ -201,15 +208,11 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .mblock.open .mtitle::after { transform: rotate(-135deg); margin-top: 4px; }
 .mcode { font-size: 11px; color: var(--muted); margin-top: 6px; }
 .srow { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; padding: 1px 0; }
-.srow .inc { color: var(--income); }
-.srow .exp { color: var(--expense); }
 .srow.tot { font-weight: 700; border-top: 1px solid var(--rule); margin-top: 3px; padding-top: 4px; }
 .tree { margin: 8px 0 4px 6px; padding-left: 12px; border-left: 2px solid var(--rule); }
 .tree-title { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
 .trow { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-size: 15px; font-variant-numeric: tabular-nums; }
 .trow .tn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.trow.income .ta { color: var(--income); }
-.trow.expense .ta { color: var(--expense); }
 .footnote { color: var(--muted); font-size: 13px; margin-top: 14px; }
 [hidden] { display: none !important; }
 @media (prefers-reduced-motion: no-preference) {
@@ -269,7 +272,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
       <input type="text" id="newAcctName" placeholder="New account name">
       <div class="r2">
         <select id="newAcctCur" aria-label="Currency"></select>
-        <input type="text" id="newAcctOpen" placeholder="Opening balance" inputmode="decimal" aria-label="Opening balance">
+        <input type="text" id="newAcctOpen" placeholder="Opening balance" inputmode="numeric" aria-label="Opening balance">
         <button class="btn primary" type="submit">Add</button>
       </div>
     </form>
@@ -335,10 +338,8 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
     </div>
 
     <div id="normalFields">
-      <div class="two">
-        <label class="field"><span>Category</span><select id="fCategory"></select></label>
-        <label class="field"><span>Account</span><select id="fAccount"></select></label>
-      </div>
+      <label class="field"><span>Account</span><select id="fAccount"></select></label>
+      <label class="field"><span>Category</span><select id="fCategory"></select></label>
       <label class="field"><span>Description</span>
         <input type="text" id="fDesc" placeholder="Optional">
       </label>
@@ -419,9 +420,10 @@ const el = (tag, props = {}, ...kids) => {
 const para = (text, cls) => el('p', cls ? { class: cls, text } : { text });
 
 /* MONEY-START */
-const CURRENCIES = ['USD', 'CLP'];
+const CURRENCIES = ['CLP', 'USD', 'EUR'];
+const SYMBOLS = { CLP: '$', USD: '$', EUR: '€' };
 
-/** Number to text without symbol. CLP: 1.234.567 (no decimals). USD: 1,234,567.89 */
+/** Number to text without symbol. CLP: 1.234.567 (no decimals). USD and EUR: 1,234,567.89 */
 function fmtPlain(n, cur) {
   const clp = cur === 'CLP';
   const s = Math.abs(n).toFixed(clp ? 0 : 2);
@@ -429,7 +431,7 @@ function fmtPlain(n, cur) {
   i = i.replace(/\B(?=(\d{3})+(?!\d))/g, clp ? '.' : ',');
   return (n < 0 ? '-' : '') + i + (f ? '.' + f : '');
 }
-const fmtMoney = (n, cur) => (n < 0 ? '-$' : '$') + fmtPlain(Math.abs(n), cur);
+const fmtMoney = (n, cur) => (n < 0 ? '-' : '') + (SYMBOLS[cur] || '$') + fmtPlain(Math.abs(n), cur);
 
 /** Text to number for the given currency. Returns null if there is no number. */
 function parseAmount(str, cur) {
@@ -439,7 +441,7 @@ function parseAmount(str, cur) {
     const d = s.replace(/[.,]/g, '');
     return d ? parseInt(d, 10) : null;
   }
-  // USD: commas are thousands separators. A lone comma followed by 1-2 digits is treated as a decimal comma
+  // USD / EUR: commas are thousands separators. A lone comma followed by 1-2 digits is treated as a decimal comma
   // (some phone keyboards show a comma on the decimal key).
   if (!s.includes('.')) {
     const m = s.match(/^(\d[\d,]*),(\d{1,2})$/);
@@ -651,7 +653,7 @@ async function seedIfNeeded() {
   await new Promise((resolve, reject) => {
     const t = db.transaction(['cats', 'accounts', 'settings'], 'readwrite');
     buildCategoryList([], []).forEach((c) => t.objectStore('cats').add(c));
-    const r = t.objectStore('accounts').add({ name: 'Cash', opening: 0, currency: 'USD', pos: 0 });
+    const r = t.objectStore('accounts').add({ name: 'Cash', opening: 0, currency: 'CLP', pos: 0 });
     r.onsuccess = () => t.objectStore('settings').put({ key: 'defaultAcct', value: r.result });
     t.objectStore('settings').put({ key: 'seeded', value: true });
     t.oncomplete = resolve;
@@ -722,7 +724,7 @@ function dayLabel(key) {
   const dt = new Date(y, m - 1, d);
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const diff = Math.round((today - dt) / 864e5);
-  let s = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  let s = dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   if (dt.getFullYear() !== today.getFullYear()) s += ', ' + dt.getFullYear();
   if (diff === 0) s += ' - Today';
   else if (diff === 1) s += ' - Yesterday';
@@ -924,7 +926,7 @@ function fillSelect(sel, options, selected) {
     return opt;
   }));
 }
-const acctOptions = () => state.accts.map((a) => ({ value: a.id, label: `${a.name} (${a.currency})` }));
+const acctOptions = () => state.accts.map((a) => ({ value: a.id, label: a.name }));
 
 /** Category choices depend on the entry type (expense or income). */
 function fillCategorySelect(selected, allowOrphan) {
@@ -1115,13 +1117,13 @@ $('#btnBack').addEventListener('click', () => showView('home'));
 $('#btnStatsBack').addEventListener('click', () => showView('home'));
 
 /* ---------- stats view ---------- */
-/** Per month and currency: income, expenses and a total per category (in cents).
+/** Per period (month: len 7, year: len 4) and currency: income, expenses and a total per category (in cents).
  *  Transfers and opening balances are left out: they are not income or spending. */
-function monthAggregates() {
+function periodAggregates(len) {
   const map = new Map();
   for (const t of state.tx) {
     if (t.transferId || isOpening(t)) continue;
-    const k = t.date.slice(0, 7);
+    const k = t.date.slice(0, len);
     const cur = txCur(t);
     const m = map.get(k) || {};
     const c = m[cur] || (m[cur] = { inc: 0, exp: 0, cats: new Map() });
@@ -1134,18 +1136,21 @@ function monthAggregates() {
   return [...map.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
 }
 
-const srow = (label, cls, text) => el('div', { class: 'srow ' + cls }, el('span', { text: label }), el('span', { text }));
+/** Green above zero, red below, plain at zero. */
+const signClass = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : '');
+const srow = (label, tot, value, cur) => el('div', { class: 'srow' + (tot ? ' tot' : '') },
+  el('span', { text: label }),
+  el('span', { class: signClass(value), text: (value > 0 ? '+' : '') + fmtMoney(value / 100, cur) }));
 
-function monthBlock(k, data) {
-  const open = state.statsOpen.has(k);
-  const kids = [el('div', { class: 'mtitle', text: monthLabel(k) })];
+function periodBlock(id, title, data) {
+  const open = state.statsOpen.has(id);
+  const kids = [el('div', { class: 'mtitle', text: title })];
   CURRENCIES.filter((c) => data[c]).forEach((c) => {
     const d = data[c];
-    const net = d.inc - d.exp;
     kids.push(el('div', { class: 'mcode', text: c }));
-    kids.push(srow('Income', 'inc', d.inc ? '+' + fmtMoney(d.inc / 100, c) : fmtMoney(0, c)));
-    kids.push(srow('Expenses', 'exp', d.exp ? '-' + fmtMoney(d.exp / 100, c) : fmtMoney(0, c)));
-    kids.push(srow('Total', 'tot', (net > 0 ? '+' : '') + fmtMoney(net / 100, c)));
+    kids.push(srow('Income', false, d.inc, c));
+    kids.push(srow('Expenses', false, -d.exp, c));
+    kids.push(srow('Total', true, d.inc - d.exp, c));
     if (open) {
       const rows = [...d.cats.entries()].map(([key, v]) => {
         const i = key.indexOf('|');
@@ -1153,21 +1158,21 @@ function monthBlock(k, data) {
       }).sort((a, b) => (a.kind === b.kind ? b.v - a.v : (a.kind === 'income' ? -1 : 1)));
       kids.push(el('div', { class: 'tree' },
         el('div', { class: 'tree-title', text: 'By category' }),
-        ...rows.map((r) => el('div', { class: 'trow ' + r.kind },
+        ...rows.map((r) => el('div', { class: 'trow' },
           el('span', { class: 'tn', text: r.name }),
-          el('span', { class: 'ta', text: (r.kind === 'income' ? '+' : '-') + fmtMoney(r.v / 100, c) })))));
+          el('span', { class: r.kind === 'income' ? 'pos' : 'neg', text: (r.kind === 'income' ? '+' : '-') + fmtMoney(r.v / 100, c) })))));
     }
   });
   return el('button', {
     class: 'mblock' + (open ? ' open' : ''), type: 'button',
-    onclick: () => { if (state.statsOpen.has(k)) state.statsOpen.delete(k); else state.statsOpen.add(k); renderStats(); }
+    onclick: () => { if (state.statsOpen.has(id)) state.statsOpen.delete(id); else state.statsOpen.add(id); renderStats(); }
   }, kids);
 }
 
-function balLine(name, cur, c, extra = '') {
-  return el('div', { class: 'bal-line ' + extra },
+function balLine(name, cur, c) {
+  return el('div', { class: 'bal-line' },
     el('span', { class: 'nm', text: name }),
-    el('span', { class: 'amt' + (c < 0 ? ' neg' : ''), text: fmtMoney(c / 100, cur) }, el('span', { class: 'code', text: cur }))
+    el('span', { class: 'amt ' + signClass(c), text: fmtMoney(c / 100, cur) }, el('span', { class: 'code', text: cur }))
   );
 }
 
@@ -1175,24 +1180,19 @@ function renderStats() {
   const body = $('#statsBody');
   body.replaceChildren();
   const bal = balances();
-  const totals = {};
-  state.accts.forEach((a) => { totals[a.currency] = (totals[a.currency] || 0) + (bal.get(a.id) || 0); });
-
-  body.append(el('section', { class: 'sec' }, el('h2', { text: 'Total balance' }),
-    ...CURRENCIES.filter((c) => totals[c] !== undefined).map((c) => balLine(c === 'USD' ? 'US dollars' : 'Chilean pesos', c, totals[c], 'bal-total'))));
 
   body.append(el('section', { class: 'sec' }, el('h2', { text: 'Accounts' }),
     ...state.accts.map((a) => balLine(a.name, a.currency, bal.get(a.id) || 0))));
 
-  const months = monthAggregates();
-  const sec = el('section', { class: 'sec' }, el('h2', { text: 'By month' }));
-  if (!months.length) {
-    sec.append(el('div', { class: 'empty', text: 'Income and expenses will show up here by month.' }));
-  } else {
-    months.forEach(([k, data]) => sec.append(monthBlock(k, data)));
-    sec.append(el('p', { class: 'footnote', text: 'Tap a month to see it by category. Transfers between your accounts and opening balances are not counted as income or expenses.' }));
-  }
-  body.append(sec);
+  [['Monthly summary', 7, 'm', monthLabel, 'Income and expenses will show up here by month.'],
+   ['Yearly summary', 4, 'y', (k) => k, 'Income and expenses will show up here by year.']].forEach(([title, len, prefix, label, none]) => {
+    const periods = periodAggregates(len);
+    const sec = el('section', { class: 'sec' }, el('h2', { text: title }));
+    if (!periods.length) sec.append(el('div', { class: 'empty', text: none }));
+    else periods.forEach(([k, data]) => sec.append(periodBlock(prefix + ':' + k, label(k), data)));
+    body.append(sec);
+  });
+  body.append(el('p', { class: 'footnote', text: 'Tap a month or a year to see it by category. Transfers between your accounts and opening balances are not counted as income or expenses.' }));
 }
 
 /* ---------- settings view ---------- */
@@ -1285,7 +1285,7 @@ function renderSettings() {
   renderAccounts();
   renderCats('expense');
   renderCats('income');
-  fillSelect($('#newAcctCur'), CURRENCIES.map((c) => ({ value: c, label: c })), $('#newAcctCur').value || 'USD');
+  fillSelect($('#newAcctCur'), CURRENCIES.map((c) => ({ value: c, label: c })), $('#newAcctCur').value || 'CLP');
   if (navigator.storage && navigator.storage.persisted) {
     navigator.storage.persisted().then((p) => {
       $('#persistNote').textContent = (p
@@ -1301,7 +1301,7 @@ $('#reorderExpense').addEventListener('click', () => { state.reorder.expense = !
 $('#reorderIncome').addEventListener('click', () => { state.reorder.income = !state.reorder.income; renderSettings(); });
 
 /* new account (with opening balance) */
-let openCur = 'USD';
+let openCur = 'CLP';
 const newOpen = $('#newAcctOpen');
 const parseOpening = (raw, cur) => {
   const v = parseAmount(raw, cur);
@@ -1340,6 +1340,10 @@ $('#addAcctForm').addEventListener('submit', async (e) => {
   });
   $('#newAcctName').value = '';
   newOpen.value = '';
+  $('#newAcctCur').value = 'CLP';           // new accounts always start on the default currency
+  openCur = 'CLP';
+  newOpen.placeholder = 'Opening balance';
+  newOpen.inputMode = 'numeric';
   await reload();
   renderSettings();
 });
