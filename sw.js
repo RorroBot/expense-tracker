@@ -1,7 +1,8 @@
+// Expense Tracker v1.0 (20261029.0737)
 // Offline cache for the app shell. Uses stale-while-revalidate:
 // the cached copy is served instantly, and a fresh copy is fetched in the
 // background, so updates you upload appear the second time you open the app.
-const CACHE = 'expenses-shell-v5';
+const CACHE = 'expenses-shell-20261029.0737';
 const ASSETS = [
   './',
   './index.html',

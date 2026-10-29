@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Expense Tracker v1.0 (20261029.0737) -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -218,6 +219,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
 .trow { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-size: 15px; font-variant-numeric: tabular-nums; }
 .trow .tn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .footnote { color: var(--muted); font-size: 13px; margin-top: 14px; }
+.app-version { margin: 34px 0 6px; text-align: center; color: var(--muted); font-size: 13px; }
 [hidden] { display: none !important; }
 @media (prefers-reduced-motion: no-preference) {
   .fab, .btn, .row { transition: transform .12s, background-color .12s; }
@@ -311,6 +313,8 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
       <input type="file" id="fileRestore" accept="application/json,.json" hidden>
     </div>
   </section>
+
+  <footer class="app-version" id="appVersion"></footer>
 </main>
 
 <button class="fab" id="btnAdd" aria-label="Add entry">
@@ -407,6 +411,8 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
 
 <script>
 'use strict';
+/* Expense Tracker v1.0 (20261029.0737) */
+const APP_VERSION = 'v1.0 (20261029.0737)';
 
 /* ---------- tiny helpers ---------- */
 const $ = (s) => document.querySelector(s);
@@ -1349,6 +1355,7 @@ function renderCats(kind) {
 }
 
 function renderSettings() {
+  $('#appVersion').textContent = 'Version ' + APP_VERSION;
   renderAccounts();
   renderCats('expense');
   renderCats('income');

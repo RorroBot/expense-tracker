@@ -1,4 +1,5 @@
 {
+  "version": "v1.0 (20261029.0737)",
   "name": "Expense Tracker",
   "short_name": "Expenses",
   "description": "Personal expense and income tracker. Data stays on this device.",
