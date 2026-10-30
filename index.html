@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Expense Tracker v1.0 (20261029.0737) -->
+<!-- Expense Tracker v1.0 (20261029.2114) -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -219,6 +219,15 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
 .trow { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-size: 15px; font-variant-numeric: tabular-nums; }
 .trow .tn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .footnote { color: var(--muted); font-size: 13px; margin-top: 14px; }
+.errlist { max-height: 42vh; overflow: auto; margin: 0 0 4px; padding: 10px 12px; background: var(--paper); border: 1.5px solid var(--edge); border-radius: 10px;
+  font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-word; }
+.dlg p.hint2 { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+.cmp { width: 100%; border-collapse: collapse; margin: 4px 0 12px; font-size: 14px; }
+.cmp th, .cmp td { padding: 6px 4px; border-bottom: 1px solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; }
+.cmp th:first-child { text-align: left; color: var(--muted); font-weight: 500; }
+.cmp tr:first-child th { color: var(--ink); font-weight: 650; border-bottom: 1.5px solid var(--ink); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); z-index: 20; max-width: 90vw;
+  background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 12px; font-size: 14px; box-shadow: var(--shadow); text-align: center; }
 .app-version { margin: 34px 0 6px; text-align: center; color: var(--muted); font-size: 13px; }
 [hidden] { display: none !important; }
 @media (prefers-reduced-motion: no-preference) {
@@ -305,6 +314,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
   <section class="sec">
     <h2>Your data</h2>
     <p class="hint" id="persistNote">Everything is stored on this device only. Back up regularly. Backups include your accounts and category lists.</p>
+    <p class="hint" id="lastBackup"></p>
     <div class="data-btns">
       <button class="btn" id="btnXlsx" type="button">Export entries to Excel (.xlsx)</button>
       <button class="btn" id="btnCsv" type="button">Export entries as CSV</button>
@@ -316,6 +326,8 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
 
   <footer class="app-version" id="appVersion"></footer>
 </main>
+
+<div class="toast" id="toast" role="status" hidden></div>
 
 <button class="fab" id="btnAdd" aria-label="Add entry">
   <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
@@ -411,8 +423,8 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
 
 <script>
 'use strict';
-/* Expense Tracker v1.0 (20261029.0737) */
-const APP_VERSION = 'v1.0 (20261029.0737)';
+/* Expense Tracker v1.0 (20261029.2114) */
+const APP_VERSION = 'v1.0 (20261029.2114)';
 
 /* ---------- tiny helpers ---------- */
 const $ = (s) => document.querySelector(s);
@@ -558,6 +570,255 @@ function buildXlsx(rows) {
 }
 /* XLSX-END */
 
+/* ---------- backup file checks (pure functions) ---------- */
+/* BACKUP-CHECK-START */
+/** Finds where a JSON text is broken. Returns {line, col, message, snippet} or null. */
+function jsonErrorInfo(text) {
+  const n = text.length;
+  let i = 0;
+  const fail = (message, at = i) => { const e = new Error(message); e.at = at; throw e; };
+  const ws = () => { while (i < n && (text[i] === ' ' || text[i] === '\t' || text[i] === '\n' || text[i] === '\r')) i++; };
+  const str = () => {
+    const start = i;
+    i++;
+    while (i < n && text[i] !== '"') {
+      if (text[i] === '\n') fail('this text value is not closed (missing closing quote)', start);
+      if (text[i] === '\\') {
+        i++;
+        if ('"\\/bfnrt'.includes(text[i])) { i++; continue; }
+        if (text[i] === 'u' && /^[0-9a-fA-F]{4}$/.test(text.slice(i + 1, i + 5))) { i += 5; continue; }
+        fail('invalid backslash sequence inside a text value');
+      }
+      i++;
+    }
+    if (i >= n) fail('this text value is not closed (missing closing quote)', start);
+    i++;
+  };
+  const NUM = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+  function val() {
+    ws();
+    const c = text[i];
+    if (c === undefined) fail('the file ends unexpectedly (it looks cut off)');
+    if (c === '{') {
+      i++; ws();
+      if (text[i] === '}') { i++; return; }
+      for (;;) {
+        ws();
+        if (text[i] !== '"') fail('expected a name in double quotes here');
+        str(); ws();
+        if (text[i] !== ':') fail('expected ":" after the name');
+        i++; val(); ws();
+        if (text[i] === ',') { i++; continue; }
+        if (text[i] === '}') { i++; return; }
+        fail('expected "," or "}" here (a comma may be missing between two items)');
+      }
+    }
+    if (c === '[') {
+      i++; ws();
+      if (text[i] === ']') { i++; return; }
+      for (;;) {
+        val(); ws();
+        if (text[i] === ',') { i++; continue; }
+        if (text[i] === ']') { i++; return; }
+        fail('expected "," or "]" here (a comma may be missing between two items)');
+      }
+    }
+    if (c === '"') return str();
+    for (const w of ['true', 'false', 'null']) if (text.startsWith(w, i)) { i += w.length; return; }
+    NUM.lastIndex = i;
+    const m = NUM.exec(text);
+    if (m) { i += m[0].length; return; }
+    fail(`unexpected character "${c}"`);
+  }
+  try {
+    if (!text.trim()) return { line: 1, col: 1, message: 'the file is empty', snippet: '' };
+    val(); ws();
+    if (i < n) fail('unexpected text after the end of the data');
+    return null;
+  } catch (e) {
+    if (e.at === undefined) throw e;
+    const before = text.slice(0, e.at);
+    const line = before.split('\n').length;
+    const col = e.at - (before.lastIndexOf('\n') + 1) + 1;
+    const lineText = (text.split('\n')[line - 1] || '').replace(/\r$/, '');
+    const from = Math.max(0, col - 40);
+    const shown = lineText.slice(from, from + 90);
+    return { line, col, message: e.message, snippet: shown + '\n' + ' '.repeat(Math.max(0, col - 1 - from)) + '^' };
+  }
+}
+
+/** For each list directly inside the top-level object, the line number where every item starts. */
+function elementLines(text) {
+  const out = {};
+  const stack = [];
+  const n = text.length;
+  let line = 1, i = 0, key = null, arrKey = null, want = false;
+  while (i < n) {
+    const c = text[i];
+    if (c === '\n') { line++; i++; continue; }
+    if (c === ' ' || c === '\t' || c === '\r') { i++; continue; }
+    if (want && c !== ']') { out[arrKey].push(line); want = false; }
+    if (c === '"') {
+      let j = i + 1;
+      while (j < n && text[j] !== '"') { if (text[j] === '\\') j++; j++; }
+      if (stack.length === 1 && stack[0] === '{') {
+        let k = j + 1;
+        while (k < n && /\s/.test(text[k])) k++;
+        if (text[k] === ':') key = text.slice(i + 1, j);
+      }
+      i = j + 1;
+      continue;
+    }
+    if (c === '{' || c === '[') {
+      if (c === '[' && stack.length === 1 && stack[0] === '{' && key) { arrKey = key; out[arrKey] = []; want = true; }
+      stack.push(c); i++; continue;
+    }
+    if (c === '}' || c === ']') {
+      if (c === ']' && stack.length === 2 && arrKey) { arrKey = null; want = false; }
+      stack.pop(); i++; continue;
+    }
+    if (c === ',') { if (stack.length === 2 && stack[1] === '[' && arrKey) want = true; i++; continue; }
+    i++;
+  }
+  return out;
+}
+
+const validDateTime = (s) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(typeof s === 'string' ? s : '');
+  if (!m) return false;
+  const [y, mo, d, h, mi] = m.slice(1).map(Number);
+  return mo >= 1 && mo <= 12 && h <= 23 && mi <= 59 && d >= 1 && d <= new Date(y, mo, 0).getDate();
+};
+
+/** Strict check of a parsed backup. Returns {errors, warnings, legacy}. Errors block the restore. */
+function validateBackup(data, lines) {
+  const errors = [];
+  const warnings = [];
+  const show = (v) => (v === undefined ? 'missing' : JSON.stringify(v));
+  const where = (key, i) => { const ln = lines && lines[key] && lines[key][i]; return `${ln ? 'line ' + ln + ', ' : ''}${key}[${i}]`; };
+  const put = (list, key, i, label, msg) => list.push(`${where(key, i)}${label ? ' (' + label + ')' : ''}: ${msg}`);
+  const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+
+  if (!isObj(data)) {
+    errors.push('The file must hold one JSON object { ... }, but it holds ' + (Array.isArray(data) ? 'a list [ ... ]' : data === null ? 'null' : 'a ' + typeof data) + '.');
+    return { errors, warnings, legacy: false };
+  }
+  if (data.app !== 'expense-tracker') errors.push(`"app" must be "expense-tracker" but it is ${show(data.app)}. This does not look like a backup made by this app.`);
+  const needList = (key) => {
+    if (Array.isArray(data[key])) return true;
+    errors.push(`"${key}" is ${data[key] === undefined ? 'missing' : 'not a list'}.`);
+    return false;
+  };
+  const okTx = needList('transactions');
+  const okAcc = needList('accounts');
+  const legacy = !Array.isArray(data.cats) && Array.isArray(data.categories);
+  let catKey = null;
+  if (Array.isArray(data.cats)) catKey = 'cats';
+  else if (legacy) catKey = 'categories';
+  else errors.push(`"cats" (the category lists) is ${data.cats === undefined ? 'missing' : 'not a list'}.`);
+  if (data.settings !== undefined && !Array.isArray(data.settings)) errors.push('"settings" is not a list.');
+  if (legacy) warnings.push('This backup comes from an older version. Its categories will be converted into separate expense and income lists, and the example categories will be added.');
+
+  /* accounts */
+  const accIds = new Set();
+  if (okAcc) {
+    if (!data.accounts.length) errors.push('"accounts" is empty. The app needs at least one account.');
+    const names = new Map();
+    data.accounts.forEach((a, i) => {
+      if (!isObj(a)) { put(errors, 'accounts', i, '', `must be an object { ... }, found ${show(a)}`); return; }
+      const label = [a.id !== undefined ? 'id ' + (typeof a.id === 'object' ? JSON.stringify(a.id) : a.id) : '', typeof a.name === 'string' ? `"${a.name}"` : ''].filter(Boolean).join(', ');
+      if (!Number.isInteger(a.id) || a.id < 1) put(errors, 'accounts', i, label, `"id" must be a whole number from 1 up, found ${show(a.id)}`);
+      else if (accIds.has(a.id)) put(errors, 'accounts', i, label, `"id" ${a.id} is already used by another account`);
+      else accIds.add(a.id);
+      if (typeof a.name !== 'string' || !a.name.trim()) put(errors, 'accounts', i, label, `"name" must be some text, found ${show(a.name)}`);
+      else {
+        const k = a.name.trim().toLowerCase();
+        if (names.has(k)) put(warnings, 'accounts', i, label, `has the same name as accounts[${names.get(k)}]`);
+        else names.set(k, i);
+      }
+      if (a.currency !== undefined && !CURRENCIES.includes(a.currency)) put(errors, 'accounts', i, label, `"currency" must be one of ${CURRENCIES.join(', ')}, found ${show(a.currency)}`);
+      if (a.opening !== undefined && !Number.isFinite(a.opening)) put(errors, 'accounts', i, label, `"opening" must be a number, found ${show(a.opening)}`);
+      if (a.pos !== undefined && !Number.isFinite(a.pos)) put(errors, 'accounts', i, label, `"pos" must be a number, found ${show(a.pos)}`);
+    });
+  }
+
+  /* categories */
+  if (catKey === 'cats') {
+    const seen = new Map();
+    data.cats.forEach((c, i) => {
+      if (!isObj(c)) { put(errors, 'cats', i, '', `must be an object { ... }, found ${show(c)}`); return; }
+      const label = [typeof c.name === 'string' ? `"${c.name}"` : '', typeof c.kind === 'string' ? c.kind : ''].filter(Boolean).join(', ');
+      if (typeof c.name !== 'string' || !c.name.trim()) put(errors, 'cats', i, label, `"name" must be some text, found ${show(c.name)}`);
+      if (c.kind !== 'expense' && c.kind !== 'income') put(errors, 'cats', i, label, `"kind" must be "expense" or "income", found ${show(c.kind)}`);
+      if (c.id !== undefined && (!Number.isInteger(c.id) || c.id < 1)) put(errors, 'cats', i, label, `"id" must be a whole number from 1 up, found ${show(c.id)}`);
+      if (c.pos !== undefined && !Number.isFinite(c.pos)) put(errors, 'cats', i, label, `"pos" must be a number, found ${show(c.pos)}`);
+      if (typeof c.name === 'string') {
+        const k = c.kind + '|' + c.name.trim().toLowerCase();
+        if (seen.has(k)) put(warnings, 'cats', i, label, `is a duplicate of cats[${seen.get(k)}]`);
+        else seen.set(k, i);
+      }
+    });
+  } else if (catKey === 'categories') {
+    data.categories.forEach((c, i) => {
+      if (!isObj(c) || typeof c.name !== 'string' || !c.name.trim()) put(errors, 'categories', i, '', `must be an object with a "name", found ${show(c)}`);
+    });
+  }
+
+  /* entries */
+  if (okTx) {
+    const ids = new Set();
+    const transfers = new Map();
+    const known = [...accIds].sort((a, b) => a - b).join(', ') || 'none';
+    data.transactions.forEach((t, i) => {
+      if (!isObj(t)) { put(errors, 'transactions', i, '', `must be an object { ... }, found ${show(t)}`); return; }
+      const label = [t.id !== undefined ? 'id ' + (typeof t.id === 'object' ? JSON.stringify(t.id) : t.id) : '', typeof t.date === 'string' ? t.date : '', typeof t.category === 'string' ? t.category : ''].filter(Boolean).join(', ');
+      const bad = (msg) => put(errors, 'transactions', i, label, msg);
+      if (!Number.isInteger(t.id) || t.id < 1) bad(`"id" must be a whole number from 1 up, found ${show(t.id)}`);
+      else if (ids.has(t.id)) bad(`"id" ${t.id} is already used by another entry`);
+      else ids.add(t.id);
+      if (t.type !== 'expense' && t.type !== 'income') bad(`"type" must be "expense" or "income", found ${show(t.type)}`);
+      if (typeof t.amount !== 'number' || !Number.isFinite(t.amount) || t.amount <= 0) bad(`"amount" must be a number above 0, found ${show(t.amount)}`);
+      if (!validDateTime(t.date)) bad(`"date" must look like 2026-10-29T07:37 (a real date and time), found ${show(t.date)}`);
+      if (!Number.isInteger(t.accountId)) bad(`"accountId" must be a whole number, found ${show(t.accountId)}`);
+      else if (okAcc && !accIds.has(t.accountId)) bad(`"accountId" ${t.accountId} does not match any account in this file (accounts have ids: ${known})`);
+      if (typeof t.category !== 'string') bad(`"category" must be text (use "" for none), found ${show(t.category)}`);
+      for (const f of ['description', 'notes']) if (t[f] !== undefined && typeof t[f] !== 'string') bad(`"${f}" must be text, found ${show(t[f])}`);
+      if (t.transferId !== undefined) {
+        if (typeof t.transferId !== 'string' || !t.transferId) bad(`"transferId" must be text, found ${show(t.transferId)}`);
+        else { if (!transfers.has(t.transferId)) transfers.set(t.transferId, []); transfers.get(t.transferId).push({ i, type: t.type }); }
+      }
+    });
+    transfers.forEach((legs, tid) => {
+      const ok = legs.length === 2 && legs.some((l) => l.type === 'expense') && legs.some((l) => l.type === 'income');
+      if (!ok) put(warnings, 'transactions', legs[0].i, `transfer ${tid}`, `a transfer should have exactly 2 entries (one expense and one income), this one has ${legs.length}`);
+    });
+  }
+
+  /* settings */
+  if (Array.isArray(data.settings)) {
+    data.settings.forEach((s, i) => {
+      if (!isObj(s) || typeof s.key !== 'string') put(errors, 'settings', i, '', `must be an object with a "key", found ${show(s)}`);
+      else if (s.key === 'defaultAcct' && okAcc && !accIds.has(s.value)) put(warnings, 'settings', i, 'defaultAcct', 'the default account does not exist in this file, the first account will be used');
+    });
+  }
+  return { errors, warnings, legacy };
+}
+
+/** Counts and first / last entry date-times for a list of entries. */
+function summarizeEntries(list) {
+  let first = null, last = null;
+  list.forEach((t) => {
+    if (typeof t.date !== 'string') return;
+    if (first === null || t.date < first) first = t.date;
+    if (last === null || t.date > last) last = t.date;
+  });
+  return { entries: list.length, first, last };
+}
+/** "20261029.2114" from a text like "v1.0 (20261029.2114)", or null. */
+const buildOf = (v) => { const m = /\((\d{8}\.\d{4})\)/.exec(typeof v === 'string' ? v : ''); return m ? m[1] : null; };
+/* BACKUP-CHECK-END */
+
+
 /* ---------- constants & default categories ---------- */
 const OPENING = 'Opening Balance';
 const TRANSFER = 'Transfer';
@@ -629,19 +890,24 @@ function openDB() {
 
 const reqP = (r) => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
 
-/* Run writes in one transaction; resolves only once it has fully committed. */
+/* Run writes in one transaction. It is all-or-nothing: if anything throws, the whole transaction is cancelled. */
 function write(storeNames, fn) {
   return new Promise((resolve, reject) => {
     const t = db.transaction(storeNames, 'readwrite');
     let out;
-    const stores = Array.isArray(storeNames)
-      ? Object.fromEntries(storeNames.map((n) => [n, t.objectStore(n)]))
-      : t.objectStore(storeNames);
-    const r = fn(stores, t);
-    if (r && 'onsuccess' in r) r.onsuccess = () => { out = r.result; };
     t.oncomplete = () => resolve(out);
     t.onerror = () => reject(t.error);
-    t.onabort = () => reject(t.error);
+    t.onabort = () => reject(t.error || new Error('The change was cancelled'));
+    try {
+      const stores = Array.isArray(storeNames)
+        ? Object.fromEntries(storeNames.map((n) => [n, t.objectStore(n)]))
+        : t.objectStore(storeNames);
+      const r = fn(stores, t);
+      if (r && 'onsuccess' in r) r.onsuccess = () => { out = r.result; };
+    } catch (err) {
+      try { t.abort(); } catch (_) { /* already finished */ }
+      reject(err);
+    }
   });
 }
 
@@ -653,6 +919,7 @@ const state = {
   fltAccts: new Set(), fltCats: new Set(), fltTab: 'acct',
   type: 'expense',            // dialog mode: expense | income | transfer
   editing: null,              // null (new) | {kind:'tx', id} | {kind:'transfer', fromId, toId, tid}
+  lastBackup: null,           // {at, entries} of the last backup shared from this device
   statsOpen: new Set(),
   editingAcct: null,          // id of the account whose name is being edited in Configuration
   reorder: { accts: false, expense: false, income: false }
@@ -689,6 +956,7 @@ async function reload() {
   state.cats = cats.sort((a, b) => (a.kind === b.kind ? (a.pos - b.pos) || a.name.localeCompare(b.name) : (a.kind < b.kind ? -1 : 1)));
   state.accts = accts.sort((a, b) => (a.pos - b.pos) || (a.id - b.id));
   const s = Object.fromEntries(settings.map((x) => [x.key, x.value]));
+  state.lastBackup = s.lastBackup ?? null;
   state.defaultAcct = state.accts.some((a) => a.id === s.defaultAcct) ? s.defaultAcct : (state.accts[0]?.id ?? null);
   [...state.fltAccts].forEach((id) => { if (!state.accts.some((a) => a.id === id)) state.fltAccts.delete(id); });
   state.legs = new Map();
@@ -795,16 +1063,37 @@ function ask({ title, body = [], buttons }) {
       resolve(v);
     };
     dlgAsk.addEventListener('close', onClose);
-    $('#askBtns').replaceChildren(...buttons.map((b) => el('button', {
-      type: 'button', class: 'btn ' + (b.cls || ''), text: b.label,
-      onclick: async () => {
-        if (b.action) await b.action();
+    $('#askBtns').replaceChildren(...buttons.map((b) => {
+      const btn = el('button', { type: 'button', class: 'btn ' + (b.cls || ''), text: b.label });
+      btn.addEventListener('click', async () => {
+        if (b.action) {
+          const r = await b.action();
+          if (typeof r === 'string') btn.textContent = r;
+        }
         if (!b.keepOpen) finish(b.value);
-      }
-    })));
+      });
+      return btn;
+    }));
     dlgAsk.showModal();
     $('#askTitle').focus();
   });
+}
+
+/* ---------- small messages ---------- */
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3500);
+}
+const fmtDT = (s) => (s ? s.replace('T', ' ') : '—');
+function renderLastBackup() {
+  const lb = state.lastBackup;
+  $('#lastBackup').textContent = lb
+    ? `Last backup: ${fmtDT(lb.at)} (${lb.entries} ${lb.entries === 1 ? 'entry' : 'entries'}).`
+    : 'No backup has been saved from this device yet.';
 }
 
 /* ---------- filters ---------- */
@@ -1355,6 +1644,7 @@ function renderCats(kind) {
 }
 
 function renderSettings() {
+  renderLastBackup();
   $('#appVersion').textContent = 'Version ' + APP_VERSION;
   renderAccounts();
   renderCats('expense');
@@ -1445,7 +1735,7 @@ async function deleteCategory(c) {
       para('Warning: make a backup before deleting categories, in case you want to go back.', 'warn')
     ],
     buttons: [
-      { label: 'Save a backup now', keepOpen: true, action: doBackup },
+      { label: 'Save a backup now', keepOpen: true, action: backupAction },
       { label: 'Delete category', value: true, cls: 'danger' },
       { label: 'Cancel', value: false }
     ]
@@ -1492,8 +1782,8 @@ async function deleteCategory(c) {
 async function saveFile(name, data, mime) {
   const file = new File([data], name, { type: mime });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: name }); return; }
-    catch (err) { if (err && err.name === 'AbortError') return; }
+    try { await navigator.share({ files: [file], title: name }); return true; }
+    catch (err) { if (err && err.name === 'AbortError') return false; }
   }
   const url = URL.createObjectURL(file);
   const a = el('a', { href: url, download: name });
@@ -1501,6 +1791,7 @@ async function saveFile(name, data, mime) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
+  return true;
 }
 
 const stamp = () => nowLocal().slice(0, 10);   // device-local date, wherever you are
@@ -1571,40 +1862,140 @@ async function exportEntries(format) {
 $('#btnCsv').addEventListener('click', () => exportEntries('csv'));
 $('#btnXlsx').addEventListener('click', () => exportEntries('xlsx'));
 
-async function doBackup() {
-  const data = { app: 'expense-tracker', version: 3, exported: nowLocal() };
-  for (const n of STORES) data[n] = await reqP(db.transaction(n).objectStore(n).getAll());
-  await saveFile(`expenses-backup-${stamp()}.json`, JSON.stringify(data, null, 2), 'application/json');
+/** The whole backup, built from the data already in memory. */
+function buildBackup() {
+  return {
+    app: 'expense-tracker', version: 3, appVersion: APP_VERSION, exported: nowLocal(),
+    transactions: state.tx, cats: state.cats, accounts: state.accts,
+    settings: [{ key: 'defaultAcct', value: state.defaultAcct }, { key: 'seeded', value: true }]
+  };
 }
-$('#btnBackup').addEventListener('click', doBackup);
+
+/** Call this straight from a tap. Everything before the share sheet opens is synchronous on purpose:
+ *  iPhone Safari refuses to open it if the app waits (for example for the database) after the tap,
+ *  and the wait grows with the amount of data. */
+async function doBackup() {
+  const text = JSON.stringify(buildBackup(), null, 2);
+  const name = `expenses-backup-${nowLocal().replace('T', '-').replace(':', '')}.json`;
+  const entries = state.tx.length;
+  const done = await saveFile(name, text, 'application/json');
+  if (done) {
+    state.lastBackup = { at: nowLocal(), entries };
+    await setSetting('lastBackup', state.lastBackup);
+    renderLastBackup();
+  }
+  return done;
+}
+const backupAction = async () => ((await doBackup()) ? 'Backup shared ✓' : undefined);
+$('#btnBackup').addEventListener('click', async () => { if (await doBackup()) toast('Backup shared. Last backup updated.'); });
+
+/* ---- restore ---- */
+function restoreProblem(fileName, intro, items) {
+  const shown = items.slice(0, 25);
+  const more = items.length - shown.length;
+  const report = [`Backup file: ${fileName}`, intro, '', ...items].join('\n');
+  return ask({
+    title: 'This backup cannot be restored',
+    body: [
+      para(`${fileName}: ${intro}`),
+      el('pre', { class: 'errlist', text: shown.join('\n\n') + (more > 0 ? `\n\n...and ${more} more` : '') }),
+      para('Nothing was changed.', 'hint2')
+    ],
+    buttons: [
+      { label: 'Copy details', keepOpen: true, action: async () => {
+        try { await navigator.clipboard.writeText(report); return 'Copied ✓'; } catch { return 'Could not copy'; }
+      } },
+      { label: 'Close', value: true }
+    ]
+  });
+}
+
+/** Shows current data next to the backup. Resolves true only if the user chooses to replace everything. */
+function confirmRestore(data, warnings, fileName) {
+  const cats = Array.isArray(data.cats) ? data.cats : data.categories;
+  const cur = { ...summarizeEntries(state.tx), accounts: state.accts.length };
+  const bak = { ...summarizeEntries(data.transactions), accounts: data.accounts.length, cats: cats.length };
+  const notes = [...warnings];
+  const bb = buildOf(data.appVersion);
+  const ab = buildOf(APP_VERSION);
+  if (bb && ab && bb > ab) notes.push(`This backup was made by a newer version of the app (${data.appVersion}); this app is ${APP_VERSION}. Update the app first, or some data may not restore correctly.`);
+  if (bak.last && cur.last && bak.last < cur.last) {
+    const lost = state.tx.filter((t) => t.date > bak.last).length;
+    notes.push(`This backup is older than your current data: ${lost} ${lost === 1 ? 'entry' : 'entries'} dated after ${fmtDT(bak.last)} will be lost.`);
+  } else if (!bak.entries && cur.entries) {
+    notes.push('This backup has no entries. All your current entries will be erased.');
+  }
+  const row = (label, a, b) => el('tr', {}, el('th', { text: label }), el('td', { text: String(a) }), el('td', { text: String(b) }));
+  const table = el('table', { class: 'cmp' },
+    el('tr', {}, el('th'), el('th', { text: 'Current data' }), el('th', { text: 'Backup' })),
+    row('Entries', cur.entries, bak.entries), row('Accounts', cur.accounts, bak.accounts),
+    row('First entry', fmtDT(cur.first), fmtDT(bak.first)), row('Last entry', fmtDT(cur.last), fmtDT(bak.last)));
+  const made = `File: ${fileName}. Made ${data.exported ? fmtDT(data.exported) : 'on an unknown date'}${data.appVersion ? ' with ' + data.appVersion : ''}.`;
+  return ask({
+    title: 'Replace your data with this backup?',
+    body: [table, ...notes.map((n) => para(n, 'warn')), para(made, 'hint2'),
+      para('Everything on this device will be replaced. This cannot be undone.', 'hint2')],
+    buttons: [
+      { label: 'Save a backup of the current data first', keepOpen: true, action: backupAction },
+      { label: 'Replace my data with this backup', value: true, cls: 'danger' },
+      { label: 'Cancel', value: false }
+    ]
+  });
+}
 
 $('#btnRestore').addEventListener('click', () => $('#fileRestore').click());
 $('#fileRestore').addEventListener('change', async (e) => {
   const f = e.target.files[0];
   e.target.value = '';
   if (!f) return;
+  let text;
+  try { text = await f.text(); }
+  catch (err) { await restoreProblem(f.name, 'The file could not be read.', [String(err && err.message ? err.message : err)]); return; }
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
   let data;
-  try { data = JSON.parse(await f.text()); } catch { alert('That file is not a valid backup.'); return; }
-  // Backups from earlier versions have one list of category names.
-  const cats = Array.isArray(data.cats) ? data.cats
-    : (Array.isArray(data.categories) ? convertOldCategories(data.categories.map((c) => c.name)) : null);
-  if (data.app !== 'expense-tracker' || !Array.isArray(data.transactions) || !Array.isArray(data.accounts) || !cats) {
-    alert('That file is not an expense tracker backup.');
+  try { data = JSON.parse(text); }
+  catch (err) {
+    const info = jsonErrorInfo(text);
+    const detail = info
+      ? `Line ${info.line}, column ${info.col}: ${info.message}.` + (info.snippet ? '\n\n' + info.snippet : '')
+      : String(err && err.message ? err.message : err);
+    await restoreProblem(f.name, 'The file is not valid JSON, so it cannot be read.', [detail]);
     return;
   }
-  if (!confirm(`Replace everything on this device with the backup (${data.transactions.length} entries)?`)) return;
-  await write(STORES, (s) => {
-    STORES.forEach((n) => s[n].clear());
-    data.transactions.forEach((x) => s.transactions.put(x));
-    cats.forEach((x) => s.cats.put(x));
-    data.accounts.forEach((x) => s.accounts.put(x));
-    (data.settings || []).forEach((x) => s.settings.put(x));
-    s.settings.put({ key: 'seeded', value: true });
-  });
+  const { errors, warnings } = validateBackup(data, elementLines(text));
+  if (errors.length) {
+    await restoreProblem(f.name, `${errors.length} problem${errors.length > 1 ? 's' : ''} found. The file was not used.`, errors);
+    return;
+  }
+  if (!(await confirmRestore(data, warnings, f.name))) return;
+
+  // Backups from earlier versions have one list of category names.
+  const cats = Array.isArray(data.cats) ? data.cats : convertOldCategories(data.categories.map((c) => c.name));
+  try {
+    await write(STORES, (s) => {
+      STORES.forEach((n) => s[n].clear());
+      data.transactions.forEach((x) => s.transactions.put(x));
+      cats.forEach((x) => s.cats.put(x));
+      data.accounts.forEach((x) => s.accounts.put(x));
+      (data.settings || []).filter((x) => x.key !== 'lastBackup').forEach((x) => s.settings.put(x));
+      s.settings.put({ key: 'seeded', value: true });
+    });
+  } catch (err) {
+    await restoreProblem(f.name, 'The restore failed and was rolled back.',
+      [`${err && err.name ? err.name + ': ' : ''}${err && err.message ? err.message : 'unknown error'}`]);
+    await reload();
+    renderSettings();
+    return;
+  }
   await reload();
   await migrateOpening();
+  if (data.exported) {
+    state.lastBackup = { at: data.exported, entries: data.transactions.length };
+    await setSetting('lastBackup', state.lastBackup);
+  }
   renderSettings();
-  alert('Backup restored.');
+  toast(`Backup restored: ${data.transactions.length} entries, ${data.accounts.length} accounts.`);
 });
 
 /* ---------- start ---------- */
